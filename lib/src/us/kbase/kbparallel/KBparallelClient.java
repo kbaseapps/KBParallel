@@ -6,20 +6,23 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import us.kbase.auth.AuthToken;
+import us.kbase.common.service.JobState;
 import us.kbase.common.service.JsonClientCaller;
 import us.kbase.common.service.JsonClientException;
 import us.kbase.common.service.RpcContext;
+import us.kbase.common.service.UnauthorizedException;
 
 /**
  * <p>Original spec-file module name: KBparallel</p>
  * <pre>
- * A KBase module: KBparallel
  * </pre>
  */
 public class KBparallelClient {
     private JsonClientCaller caller;
+    private long asyncJobCheckTimeMs = 100;
+    private int asyncJobCheckTimeScalePercent = 150;
+    private long asyncJobCheckMaxTimeMs = 300000;  // 5 minutes
     private String serviceVersion = null;
 
 
@@ -28,6 +31,49 @@ public class KBparallelClient {
      */
     public KBparallelClient(URL url) {
         caller = new JsonClientCaller(url);
+    }
+    /** Constructs a client with a custom URL.
+     * @param url the URL of the service.
+     * @param token the user's authorization token.
+     * @throws UnauthorizedException if the token is not valid.
+     * @throws IOException if an IOException occurs when checking the token's
+     * validity.
+     */
+    public KBparallelClient(URL url, AuthToken token) throws UnauthorizedException, IOException {
+        caller = new JsonClientCaller(url, token);
+    }
+
+    /** Constructs a client with a custom URL.
+     * @param url the URL of the service.
+     * @param user the user name.
+     * @param password the password for the user name.
+     * @throws UnauthorizedException if the credentials are not valid.
+     * @throws IOException if an IOException occurs when checking the user's
+     * credentials.
+     */
+    public KBparallelClient(URL url, String user, String password) throws UnauthorizedException, IOException {
+        caller = new JsonClientCaller(url, user, password);
+    }
+
+    /** Constructs a client with a custom URL
+     * and a custom authorization service URL.
+     * @param url the URL of the service.
+     * @param user the user name.
+     * @param password the password for the user name.
+     * @param auth the URL of the authorization server.
+     * @throws UnauthorizedException if the credentials are not valid.
+     * @throws IOException if an IOException occurs when checking the user's
+     * credentials.
+     */
+    public KBparallelClient(URL url, String user, String password, URL auth) throws UnauthorizedException, IOException {
+        caller = new JsonClientCaller(url, user, password, auth);
+    }
+
+    /** Get the token this client uses to communicate with the server.
+     * @return the authorization token.
+     */
+    public AuthToken getToken() {
+        return caller.getToken();
     }
 
     /** Get the URL of the service with which this client communicates.
@@ -110,6 +156,30 @@ public class KBparallelClient {
         caller.setFileForNextRpcResponse(f);
     }
 
+    public long getAsyncJobCheckTimeMs() {
+        return this.asyncJobCheckTimeMs;
+    }
+
+    public void setAsyncJobCheckTimeMs(long newValue) {
+        this.asyncJobCheckTimeMs = newValue;
+    }
+
+    public int getAsyncJobCheckTimeScalePercent() {
+        return this.asyncJobCheckTimeScalePercent;
+    }
+
+    public void setAsyncJobCheckTimeScalePercent(int newValue) {
+        this.asyncJobCheckTimeScalePercent = newValue;
+    }
+
+    public long getAsyncJobCheckMaxTimeMs() {
+        return this.asyncJobCheckMaxTimeMs;
+    }
+
+    public void setAsyncJobCheckMaxTimeMs(long newValue) {
+        this.asyncJobCheckMaxTimeMs = newValue;
+    }
+
     public String getServiceVersion() {
         return this.serviceVersion;
     }
@@ -118,10 +188,106 @@ public class KBparallelClient {
         this.serviceVersion = newValue;
     }
 
-    public Map<String, Object> status(RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+    protected <T> JobState<T> _checkJob(String jobId, TypeReference<List<JobState<T>>> retType) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
-        TypeReference<List<Map<String, Object>>> retType = new TypeReference<List<Map<String, Object>>>() {};
-        List<Map<String, Object>> res = caller.jsonrpcCall("KBparallel.status", args, retType, true, false, jsonRpcContext, this.serviceVersion);
+        args.add(jobId);
+        List<JobState<T>> res = caller.jsonrpcCall("KBparallel._check_job", args, retType, true, true);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: run</p>
+     * <pre>
+     * </pre>
+     * @param   inputParams   instance of type {@link us.kbase.kbparallel.KBparallelrunInputParams KBparallelrunInputParams}
+     * @return   parameter "rep" of type {@link us.kbase.kbparallel.KBparallelOutputObj KBparallelOutputObj}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    protected String _runSubmit(KBparallelrunInputParams inputParams, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(inputParams);
+        TypeReference<List<String>> retType = new TypeReference<List<String>>() {};
+        List<String> res = caller.jsonrpcCall("KBparallel._run_submit", args, retType, true, true, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: run</p>
+     * <pre>
+     * </pre>
+     * @param   inputParams   instance of type {@link us.kbase.kbparallel.KBparallelrunInputParams KBparallelrunInputParams}
+     * @return   parameter "rep" of type {@link us.kbase.kbparallel.KBparallelOutputObj KBparallelOutputObj}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public KBparallelOutputObj run(KBparallelrunInputParams inputParams, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        String jobId = _runSubmit(inputParams, jsonRpcContext);
+        TypeReference<List<JobState<List<KBparallelOutputObj>>>> retType = new TypeReference<List<JobState<List<KBparallelOutputObj>>>>() {};
+        long asyncJobCheckTimeMs = this.asyncJobCheckTimeMs;
+        while (true) {
+            if (Thread.currentThread().isInterrupted())
+                throw new JsonClientException("Thread was interrupted");
+            try { 
+                Thread.sleep(asyncJobCheckTimeMs);
+            } catch(Exception ex) {
+                throw new JsonClientException("Thread was interrupted", ex);
+            }
+            asyncJobCheckTimeMs = Math.min(asyncJobCheckTimeMs * this.asyncJobCheckTimeScalePercent / 100, this.asyncJobCheckMaxTimeMs);
+            JobState<List<KBparallelOutputObj>> res = _checkJob(jobId, retType);
+            if (res.getFinished() != 0L)
+                return res.getResult().get(0);
+        }
+    }
+
+    /**
+     * <p>Original spec-file function name: status</p>
+     * <pre>
+     * </pre>
+     * @param   inputParams   instance of type {@link us.kbase.kbparallel.KBparallelstatusInputParams KBparallelstatusInputParams}
+     * @return   parameter "ret" of type {@link us.kbase.kbparallel.KBparallelstatusOutputObj KBparallelstatusOutputObj}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public KBparallelstatusOutputObj status(KBparallelstatusInputParams inputParams, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(inputParams);
+        TypeReference<List<KBparallelstatusOutputObj>> retType = new TypeReference<List<KBparallelstatusOutputObj>>() {};
+        List<KBparallelstatusOutputObj> res = caller.jsonrpcCall("KBparallel.status", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: cancel_run</p>
+     * <pre>
+     * </pre>
+     * @param   inputParams   instance of original type "KBparallelcancel_runInput" (cancel_run() method)
+     * @return   parameter "ret" of original type "KBparallelcancel_runOutput"
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public String cancelRun(String inputParams, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(inputParams);
+        TypeReference<List<String>> retType = new TypeReference<List<String>>() {};
+        List<String> res = caller.jsonrpcCall("KBparallel.cancel_run", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: getlog</p>
+     * <pre>
+     * </pre>
+     * @param   inputParams   instance of original type "KBparallelgetlogInput" (getlog() method)
+     * @return   parameter "ret" of original type "KBparallelgetlogOutput"
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public String getlog(String inputParams, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(inputParams);
+        TypeReference<List<String>> retType = new TypeReference<List<String>>() {};
+        List<String> res = caller.jsonrpcCall("KBparallel.getlog", args, retType, true, true, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 }
