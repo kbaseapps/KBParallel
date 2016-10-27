@@ -13,27 +13,29 @@ module KBparallel {
     */
 
     typedef structure {
-        string module_name;         /* ManyHellos  RNAseq */
-        string method_name;         /* manyHellos (TopHatcall, Hiseqcall etc each will have own _prepare(), _runEach(), _collect() methods defined */
-        string service_ver;         /* ie. "beta" */
-        list<UnspecifiedObject>  method_params; /* list of parameters specific to the job */
-        string client_class_name;   /* None */
+        string module_name;         /* ie. ManyHellos, RNAseq */
+        string method_name;         /* manyHellos (TopHatcall, Hiseqcall etc each will have own _prepare(), _runEach(), _collect() methods defined) */
+        string service_ver;         /* ie. "beta", "dev", "release" */
+        list<UnspecifiedObject>  prepare_params; /* prepare parameter  and prepare method will generate runEach parameters */
+        list<UnspecifiedObject>  collect_params; /* collect parameter */
+        string client_class_name;   /* if it is different default $ModuleName.$ModuleNameClient  */
         int   time_limit;           /* minutes? */
     } KBparallelrunInputParams;
 
+    /* SJ: the following is not necessary */
     typedef structure {
          KBaseReport.Report  report;
          string              msg;        /* any additional message */
     }  KBparallelOutputObj;
 
-    async funcdef run( KBparallelrunInputParams input_params ) returns( KBparallelOutputObj rep ) authentication required;
+    async funcdef run( KBparallelrunInputParams input_params ) returns( KBaseReport.Report rep ) authentication required;
 
     /*
        status() method
     */
 
     typedef structure {
-        list<int>  joblist;
+        list<string>  joblist; /* job id could be UUID */
     } KBparallelstatusInputParams;
 
     typedef structure {
