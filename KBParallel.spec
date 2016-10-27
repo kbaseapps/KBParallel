@@ -1,5 +1,5 @@
 /*
-A KBase module: KBparallel
+A KBase module: KBParallel
 */
 #include <KBaseReport.spec>
 
@@ -20,15 +20,15 @@ module KBParallel {
         list<UnspecifiedObject>  collect_params; /* collect parameter */
         string client_class_name;   /* if it is different default $ModuleName.$ModuleNameClient  */
         int   time_limit;           /* minutes? */
-    } KBparallelrunInputParams;
+    } KBParallelrunInputParams;
 
     /* SJ: the following is not necessary */
     typedef structure {
          KBaseReport.Report  report;
          string              msg;        /* any additional message */
-    }  KBparallelOutputObj;
+    }  KBParallelOutputObj;
 
-    async funcdef run( KBparallelrunInputParams input_params ) returns( KBaseReport.Report rep ) authentication required;
+    async funcdef run( KBParallelrunInputParams input_params ) returns( KBaseReport.Report rep ) authentication required;
 
     /*
        status() method
@@ -36,31 +36,31 @@ module KBParallel {
 
     typedef structure {
         list<string>  joblist; /* job id could be UUID */
-    } KBparallelstatusInputParams;
+    } KBParallelstatusInputParams;
 
     typedef structure {
         int num_jobs_checked;
         list<string> jobstatus;
-    } KBparallelstatusOutputObj;
+    } KBParallelstatusOutputObj;
 
-    funcdef status( KBparallelstatusInputParams input_params ) returns( KBparallelstatusOutputObj ret ) authentication required;
+    funcdef status( KBParallelstatusInputParams input_params ) returns( KBParallelstatusOutputObj ret ) authentication required;
 
     /*
        cancel_run() method
     */
 
-    typedef string KBparallelcancel_runInput;
-    typedef string KBparallelcancel_runOutput;
+    typedef string KBParallelcancel_runInput;
+    typedef string KBParallelcancel_runOutput;
 
-    funcdef cancel_run( KBparallelcancel_runInput input_params ) returns( KBparallelcancel_runOutput ret ) authentication required;
+    funcdef cancel_run( KBParallelcancel_runInput input_params ) returns( KBParallelcancel_runOutput ret ) authentication required;
 
     /*
        getlog() method
     */
 
-    typedef string KBparallelgetlogInput;
-    typedef string KBparallelgetlogOutput;
+    typedef string KBParallelgetlogInput;
+    typedef string KBParallelgetlogOutput;
 
-    funcdef getlog( KBparallelgetlogInput input_params) returns( KBparallelgetlogOutput ret ) authentication required;
+    funcdef getlog( KBParallelgetlogInput input_params) returns( KBParallelgetlogOutput ret ) authentication required;
 
 };

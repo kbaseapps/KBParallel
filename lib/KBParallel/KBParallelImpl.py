@@ -9,6 +9,7 @@ except:
     from baseclient import BaseClient as _BaseClient  # @Reimport
 import time
 import os
+from biokbase.njs_wrapper.client import NarrativeJobService as NJS
 #END_HEADER
 
 
@@ -29,7 +30,7 @@ class KBParallel:
     ######################################### noqa
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/sean-mccorkle/KBparallel"
-    GIT_COMMIT_HASH = "c7cbd48ecdebd57b688b8c326ecec7b72e93ce68"
+    GIT_COMMIT_HASH = "eb8473ce2b5b8a24b1494092091d9e800366e51d"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -52,7 +53,7 @@ class KBParallel:
 
     def run(self, ctx, input_params):
         """
-        :param input_params: instance of type "KBparallelrunInputParams"
+        :param input_params: instance of type "KBParallelrunInputParams"
            (run() method) -> structure: parameter "module_name" of String,
            parameter "method_name" of String, parameter "service_ver" of
            String, parameter "prepare_params" of list of unspecified object,
@@ -99,25 +100,15 @@ class KBParallel:
 
         #instantiate ManyHellos client here
         print( "about to initiate client .." )
-        client = _BaseClient(self.callbackURL, timeout=self.config['time_limit'], service_ver=service_ver, token=token)
+        client = _BaseClient(self.callbackURL, timeout=self.config['time_limit'], token=token)
 
-        # using manyHellos initializer (bad programming by Sean)
-        #input_params = {
-        #                'hello_msg': "Hai",
-        #                'num_jobs': 3,
-        #                'time_limit':  self.config['time_limit'],
-        #                'njs_wrapper_url': self.config['njs-wrapper-url'],
-        #                'token': token
-        #               }
-        #res = mh.manyHellos( input_params )
-        #print( res )
 
         # issue prepare call
-
         print( "about to invoke prepare()")
-        tasks_ret = client.call_method("{}.{1}_prepare".format(input_params['module_name'], 
+        tasks_ret = client.call_method("{0}.{1}_prepare".format(input_params['module_name'], 
                                                                input_params['method_name']),
                                        input_params["prepare_params"], 
+                                       service_ver = service_ver,
                                        context=None)
         print( "back in run")
         tasks = tasks_ret[0]
@@ -125,7 +116,7 @@ class KBParallel:
 
         # initiate NJS wrapper
         print( "initiating NJS wrapper")
-        njs = NJS( url=self.config['njs-wrapper-url'], token=self.token )  # Please fix hardcoded URL
+        njs = NJS( url=self.config['njs-wrapper-url'], token=token )  
         pprint( njs)
         for task in tasks:
             pprint( ["   launching task", task]  )
@@ -139,14 +130,15 @@ class KBParallel:
 
 
         print( "about to invoke collect()" )
-        res = client.call_method("{}.{1}_collect".format(input_params['module_name'], 
-                                                         input_params['method_name']), 
+        res = client.call_method("{0}.{1}_collect".format(input_params['module_name'], 
+                                                          input_params['method_name']), 
                                  input_params["collect_params"], 
+                                 service_ver = service_ver,
                                  context=None)        
         pprint( res )
         # for now, return a dummy object with a string message
 
-        ret = { 'msg': "default KBparallel.run() return value" }
+        rep = { 'msg': "default KBparallel.run() return value" }
         #END run
 
         # At some point might do deeper type checking...
@@ -158,10 +150,10 @@ class KBParallel:
 
     def status(self, ctx, input_params):
         """
-        :param input_params: instance of type "KBparallelstatusInputParams"
+        :param input_params: instance of type "KBParallelstatusInputParams"
            (status() method) -> structure: parameter "joblist" of list of
            String
-        :returns: instance of type "KBparallelstatusOutputObj" -> structure:
+        :returns: instance of type "KBParallelstatusOutputObj" -> structure:
            parameter "num_jobs_checked" of Long, parameter "jobstatus" of
            list of String
         """
@@ -180,9 +172,9 @@ class KBParallel:
 
     def cancel_run(self, ctx, input_params):
         """
-        :param input_params: instance of type "KBparallelcancel_runInput"
+        :param input_params: instance of type "KBParallelcancel_runInput"
            (cancel_run() method)
-        :returns: instance of type "KBparallelcancel_runOutput"
+        :returns: instance of type "KBParallelcancel_runOutput"
         """
         # ctx is the context object
         # return variables are: ret
@@ -199,9 +191,9 @@ class KBParallel:
 
     def getlog(self, ctx, input_params):
         """
-        :param input_params: instance of type "KBparallelgetlogInput"
+        :param input_params: instance of type "KBParallelgetlogInput"
            (getlog() method)
-        :returns: instance of type "KBparallelgetlogOutput"
+        :returns: instance of type "KBParallelgetlogOutput"
         """
         # ctx is the context object
         # return variables are: ret
