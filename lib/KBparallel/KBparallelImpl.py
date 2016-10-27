@@ -88,7 +88,7 @@ class KBparallel:
 
 	token = ctx['token']
 	service_ver = "beta"
-	if 'service_ver' in input_params: 
+	if 'service_ver' in input_params and input_params['service_ver'] is not None: 
 	  service_ver = input_params['service_ver'] 
 
 
@@ -98,20 +98,20 @@ class KBparallel:
         pprint( mh )
 
         # using manyHellos initializer (bad programming by Sean)
-        input_params = {
-                        'hello_msg': "Hai",
-                        'num_jobs': 3,
-                        'time_limit':  self.config['time_limit'],
-                        'njs_wrapper_url': self.config['njs-wrapper-url'],
-                        'token': token
-                       }
-        res = mh.manyHellos( input_params )
-        print( res )
+        #input_params = {
+        #                'hello_msg': "Hai",
+        #                'num_jobs': 3,
+        #                'time_limit':  self.config['time_limit'],
+        #                'njs_wrapper_url': self.config['njs-wrapper-url'],
+        #                'token': token
+        #               }
+        #res = mh.manyHellos( input_params )
+        #print( res )
 
         # issue prepare call
 
         print( "about to invoke prepare()")
-        tasks_ret = mh.manyHellos_prepare( { 'num_jobs': input_params["num_jobs"] } )#
+        tasks_ret = mh.manyHellos_prepare( *tuple(input_params["prepare_params"]))
         print( "back in test_manyHellos")
         tasks = tasks_ret[0]
         pprint( tasks )
@@ -124,12 +124,15 @@ class KBparallel:
             pprint( ["   launching task", task]  )
             #r1 = mh.manyHellos_runEach( ctx, task )
             #pprint( r1 )
-            jobid = njs.run_job( {'method': "ManyHellos.manyHellos_runEach", 'params': [task], 'service_ver':  "beta"} )
+            jobid = njs.run_job( { 'method': "{0}.{1}_runEach".format(input_params['module_name'], input_params['method_name']),
+	                           'params': [task], 
+				   'service_ver':  service_ver} 
+			       )
             print( "job_id", jobid )
 
 
         print( "about to invoke collect()" )
-        res = mh.manyHellos_collect( { 'num_jobs': input_params["num_jobs"] } )  #, context=ctx );
+        res = mh.manyHellos_collect( *tuple(input_params["collect_params"]) )  #, context=ctx );
         pprint( res )
         # for now, return a dummy object with a string message
 
