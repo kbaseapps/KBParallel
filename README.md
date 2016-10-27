@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/mccorkle/KBParallel.svg?branch=master)](https://travis-ci.org/mccorkle/KBParallel)
 
-# KBparallel
+# KBParallel
 ---
 To test:
 ```
