@@ -33,7 +33,13 @@ class KBparallel:
     def __init__(self, config):
         #BEGIN_CONSTRUCTOR
         self.callbackURL = os.environ['SDK_CALLBACK_URL']
-        self.token = os.environ.get('KB_AUTH_TOKEN')          # Please fix with appropriate method(s)
+        #self.token = os.environ.get('KB_AUTH_TOKEN')          # Please fix with appropriate method(s)
+	self.config = config
+
+	# set default time limit
+	if not 'time_limit' in config
+	  self.config['time_limit']  = 5000000
+	
         #END_CONSTRUCTOR
         pass
 
@@ -80,17 +86,23 @@ class KBparallel:
         print( "Hi this is KBparallel.run() input_params are")
         pprint( input_params )
 
+	token = ctx['token']
+	service_ver = "beta"
+	if 'service_ver' in input_params: 
+	  service_ver = input_params['service_ver'] 
+
+
         #instantiate ManyHellos client here
         print( "about to initiate ManyHellos() class .." )
-        mh = MHC( url=self.callbackURL, token=self.token, service_ver = "beta" )
+        mh = MHC( url=self.callbackURL, token=token, service_ver = service_ver )
         pprint( mh )
 
         # using manyHellos initializer (bad programming by Sean)
         input_params = {
                         'hello_msg': "Hai",
                         'num_jobs': 3,
-                        'time_limit':  5000000,
-                        'njs_wrapper_url': "https://ci.kbase.us/services/njs_wrapper",
+                        'time_limit':  self.config['time_limit'],
+                        'njs_wrapper_url': self.config['njs-wrapper-url'],
                         'token': token
                        }
         res = mh.manyHellos( input_params )
@@ -106,7 +118,7 @@ class KBparallel:
 
         # initiate NJS wrapper
         print( "initiating NJS wrapper")
-        njs = NJS( url="https://ci.kbase.us/services/njs_wrapper", token=self.token )  # Please fix hardcoded URL
+        njs = NJS( url=self.config['njs-wrapper-url'], token=self.token )  # Please fix hardcoded URL
         pprint( njs)
         for task in tasks:
             pprint( ["   launching task", task]  )
