@@ -11,10 +11,10 @@ import time
 #END_HEADER
 
 
-class KBparallel:
+class KBParallel:
     '''
     Module Name:
-    KBparallel
+    KBParallel
 
     Module Description:
     
@@ -28,7 +28,7 @@ class KBparallel:
     ######################################### noqa
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/sean-mccorkle/KBparallel"
-    GIT_COMMIT_HASH = "5eea8a5184bfcdb02e99de8a843935bb67ddbd45"
+    GIT_COMMIT_HASH = "c7cbd48ecdebd57b688b8c326ecec7b72e93ce68"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -41,7 +41,7 @@ class KBparallel:
         self.config = config
 
         # set default time limit
-        if not 'time_limit' in config
+        if not 'time_limit' in config:
           self.config['time_limit']  = 5000000
 
         

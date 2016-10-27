@@ -3,7 +3,7 @@ A KBase module: KBparallel
 */
 #include <KBaseReport.spec>
 
-module KBparallel {
+module KBParallel {
     /*
         Insert your typespec information here.
     */
