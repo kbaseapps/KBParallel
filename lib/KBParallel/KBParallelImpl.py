@@ -41,7 +41,7 @@ class KBparallel:
         self.config = config
 
         # set default time limit
-        if 'time_limit' not in config
+        if not 'time_limit' in config
           self.config['time_limit']  = 5000000
 
         

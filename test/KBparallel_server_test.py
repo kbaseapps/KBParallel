@@ -14,11 +14,11 @@ except:
 from pprint import pprint  # noqa: F401
 
 from biokbase.workspace.client import Workspace as workspaceService
-from KBparallel.KBparallelImpl import KBparallel
-from KBparallel.KBparallelServer import MethodContext
+from KBParallel.KBParallelImpl import KBParallel
+from KBParallel.KBParallelServer import MethodContext
 
 
-class KBparallelTest(unittest.TestCase):
+class KBParallelTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -32,7 +32,7 @@ class KBparallelTest(unittest.TestCase):
         cls.ctx.update({'token': token,
                         'user_id': user_id,
                         'provenance': [
-                            {'service': 'KBparallel',
+                            {'service': 'KBParallel',
                              'method': 'please_never_use_it_in_production',
                              'method_params': []
                              }],
@@ -41,11 +41,11 @@ class KBparallelTest(unittest.TestCase):
         cls.cfg = {}
         config = ConfigParser()
         config.read(config_file)
-        for nameval in config.items('KBparallel'):
+        for nameval in config.items('KBParallel'):
             cls.cfg[nameval[0]] = nameval[1]
         cls.wsURL = cls.cfg['workspace-url']
         cls.wsClient = workspaceService(cls.wsURL, token=token)
-        cls.serviceImpl = KBparallel(cls.cfg)
+        cls.serviceImpl = KBParallel(cls.cfg)
 
     @classmethod
     def tearDownClass(cls):
@@ -60,7 +60,7 @@ class KBparallelTest(unittest.TestCase):
         if hasattr(self.__class__, 'wsName'):
             return self.__class__.wsName
         suffix = int(time.time() * 1000)
-        wsName = "test_KBparallel_" + str(suffix)
+        wsName = "test_KBParallel_" + str(suffix)
         ret = self.getWsClient().create_workspace({'workspace': wsName})  # noqa
         self.__class__.wsName = wsName
         return wsName
@@ -84,7 +84,7 @@ class KBparallelTest(unittest.TestCase):
         # self.assertEqual(ret[...], ...) or other unittest methods
         #pass
 
-    def test_KBparallel(self):
+    def test_KBParallel(self):
         # Prepare test objects in workspace if needed using
         # self.getWsClient().save_objects({'workspace': self.getWsName(),
         #                                  'objects': []})
@@ -92,7 +92,7 @@ class KBparallelTest(unittest.TestCase):
         # Run your method by
         # ret = self.getImpl().your_method(self.getContext(), parameters...)
         #ret = self.getImpl().manyHellos( self.getContext(), input_params )
-        print( "in test_KBparallel()")
+        print( "in test_KBParallel()")
         input_params = { 'numjobs': 3 }
         res= self.getImpl().run( self.getContext(), input_params )
         pprint( ret )
