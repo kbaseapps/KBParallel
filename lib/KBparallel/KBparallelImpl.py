@@ -2,6 +2,13 @@
 #BEGIN_HEADER
 
 from pprint import pprint
+try:
+    # baseclient and this client are in a package
+    from .baseclient import BaseClient as _BaseClient  # @UnusedImport
+except:
+    # no they aren't
+    from baseclient import BaseClient as _BaseClient  # @Reimport
+import time
 
 #END_HEADER
 
@@ -33,13 +40,13 @@ class KBparallel:
     def __init__(self, config):
         #BEGIN_CONSTRUCTOR
         self.callbackURL = os.environ['SDK_CALLBACK_URL']
-        #self.token = os.environ.get('KB_AUTH_TOKEN')          # Please fix with appropriate method(s)
-	self.config = config
+        self.config = config
 
-	# set default time limit
-	if not 'time_limit' in config
-	  self.config['time_limit']  = 5000000
-	
+        # set default time limit
+        if 'time_limit' not in config
+          self.config['time_limit']  = 5000000
+
+        
         #END_CONSTRUCTOR
         pass
 
@@ -86,16 +93,15 @@ class KBparallel:
         print( "Hi this is KBparallel.run() input_params are")
         pprint( input_params )
 
-	token = ctx['token']
-	service_ver = "beta"
-	if 'service_ver' in input_params and input_params['service_ver'] is not None: 
-	  service_ver = input_params['service_ver'] 
+        token = ctx['token']
+        service_ver = "beta"
+        if 'service_ver' in input_params and input_params['service_ver'] is not None: 
+          service_ver = input_params['service_ver'] 
 
 
         #instantiate ManyHellos client here
         print( "about to initiate ManyHellos() class .." )
-        mh = MHC( url=self.callbackURL, token=token, service_ver = service_ver )
-        pprint( mh )
+        client = _BaseClient(self.callbackURL, timeout=self.config['time_limit'], service_ver=service_ver, token=token)
 
         # using manyHellos initializer (bad programming by Sean)
         #input_params = {
@@ -111,7 +117,10 @@ class KBparallel:
         # issue prepare call
 
         print( "about to invoke prepare()")
-        tasks_ret = mh.manyHellos_prepare( *tuple(input_params["prepare_params"]))
+        tasks_ret = client.call_method("{}.{1}_prepare".format(input_params['module_name'], 
+                                                               input_params['method_name']),
+                                       input_params["prepare_params"], 
+                                       context=None)
         print( "back in test_manyHellos")
         tasks = tasks_ret[0]
         pprint( tasks )
@@ -125,14 +134,17 @@ class KBparallel:
             #r1 = mh.manyHellos_runEach( ctx, task )
             #pprint( r1 )
             jobid = njs.run_job( { 'method': "{0}.{1}_runEach".format(input_params['module_name'], input_params['method_name']),
-	                           'params': [task], 
-				   'service_ver':  service_ver} 
-			       )
+                                   'params': [task], 
+                                   'service_ver':  service_ver} 
+                               )
             print( "job_id", jobid )
 
 
         print( "about to invoke collect()" )
-        res = mh.manyHellos_collect( *tuple(input_params["collect_params"]) )  #, context=ctx );
+        res = client.call_method("{}.{1}_collect".format(input_params['module_name'], 
+                                                         input_params['method_name']), 
+                                 input_params["collect_params"], 
+                                 context=None)        
         pprint( res )
         # for now, return a dummy object with a string message
 
