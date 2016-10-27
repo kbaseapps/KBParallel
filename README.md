@@ -2,8 +2,7 @@
 
 # KBparallel
 ---
-To test it
-
+To test:
 ```
 kb-sdk test -s 
 ```
