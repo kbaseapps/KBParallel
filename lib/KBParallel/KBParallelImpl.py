@@ -8,6 +8,7 @@ except:
     # no they aren't
     from baseclient import BaseClient as _BaseClient  # @Reimport
 import time
+import os
 #END_HEADER
 
 
