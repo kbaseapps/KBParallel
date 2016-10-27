@@ -26,7 +26,8 @@ import us.kbase.common.service.UObject;
     "module_name",
     "method_name",
     "service_ver",
-    "method_params",
+    "prepare_params",
+    "collect_params",
     "client_class_name",
     "time_limit"
 })
@@ -38,8 +39,10 @@ public class KBparallelrunInputParams {
     private String methodName;
     @JsonProperty("service_ver")
     private String serviceVer;
-    @JsonProperty("method_params")
-    private List<UObject> methodParams;
+    @JsonProperty("prepare_params")
+    private List<UObject> prepareParams;
+    @JsonProperty("collect_params")
+    private List<UObject> collectParams;
     @JsonProperty("client_class_name")
     private String clientClassName;
     @JsonProperty("time_limit")
@@ -91,18 +94,33 @@ public class KBparallelrunInputParams {
         return this;
     }
 
-    @JsonProperty("method_params")
-    public List<UObject> getMethodParams() {
-        return methodParams;
+    @JsonProperty("prepare_params")
+    public List<UObject> getPrepareParams() {
+        return prepareParams;
     }
 
-    @JsonProperty("method_params")
-    public void setMethodParams(List<UObject> methodParams) {
-        this.methodParams = methodParams;
+    @JsonProperty("prepare_params")
+    public void setPrepareParams(List<UObject> prepareParams) {
+        this.prepareParams = prepareParams;
     }
 
-    public KBparallelrunInputParams withMethodParams(List<UObject> methodParams) {
-        this.methodParams = methodParams;
+    public KBparallelrunInputParams withPrepareParams(List<UObject> prepareParams) {
+        this.prepareParams = prepareParams;
+        return this;
+    }
+
+    @JsonProperty("collect_params")
+    public List<UObject> getCollectParams() {
+        return collectParams;
+    }
+
+    @JsonProperty("collect_params")
+    public void setCollectParams(List<UObject> collectParams) {
+        this.collectParams = collectParams;
+    }
+
+    public KBparallelrunInputParams withCollectParams(List<UObject> collectParams) {
+        this.collectParams = collectParams;
         return this;
     }
 
@@ -148,7 +166,7 @@ public class KBparallelrunInputParams {
 
     @Override
     public String toString() {
-        return ((((((((((((((("KBparallelrunInputParams"+" [moduleName=")+ moduleName)+", methodName=")+ methodName)+", serviceVer=")+ serviceVer)+", methodParams=")+ methodParams)+", clientClassName=")+ clientClassName)+", timeLimit=")+ timeLimit)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((("KBparallelrunInputParams"+" [moduleName=")+ moduleName)+", methodName=")+ methodName)+", serviceVer=")+ serviceVer)+", prepareParams=")+ prepareParams)+", collectParams=")+ collectParams)+", clientClassName=")+ clientClassName)+", timeLimit=")+ timeLimit)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

@@ -1,6 +1,6 @@
 SERVICE = kbparallel
-SERVICE_CAPS = KBparallel
-SPEC_FILE = KBparallel.spec
+SERVICE_CAPS = KBParallel
+SPEC_FILE = KBParallel.spec
 URL = https://kbase.us/services/kbparallel
 DIR = $(shell pwd)
 LIB_DIR = lib

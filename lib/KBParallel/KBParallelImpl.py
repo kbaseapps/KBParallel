@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 #BEGIN_HEADER
-
 from pprint import pprint
 try:
     # baseclient and this client are in a package
@@ -9,7 +8,6 @@ except:
     # no they aren't
     from baseclient import BaseClient as _BaseClient  # @Reimport
 import time
-
 #END_HEADER
 
 
@@ -29,8 +27,8 @@ class KBparallel:
     # the latter method is running.
     ######################################### noqa
     VERSION = "0.0.1"
-    GIT_URL = "https://github.com/sean-mccorkle/KBparallel.git"
-    GIT_COMMIT_HASH = "88c505cb8b82fe509509ea0777ff336a0e48357b"
+    GIT_URL = "https://github.com/sean-mccorkle/KBparallel"
+    GIT_COMMIT_HASH = "5eea8a5184bfcdb02e99de8a843935bb67ddbd45"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -56,14 +54,14 @@ class KBparallel:
         :param input_params: instance of type "KBparallelrunInputParams"
            (run() method) -> structure: parameter "module_name" of String,
            parameter "method_name" of String, parameter "service_ver" of
-           String, parameter "method_params" of list of unspecified object,
+           String, parameter "prepare_params" of list of unspecified object,
+           parameter "collect_params" of list of unspecified object,
            parameter "client_class_name" of String, parameter "time_limit" of
            Long
-        :returns: instance of type "KBparallelOutputObj" -> structure:
-           parameter "report" of type "Report" (A simple Report of a method
-           run in KBase. It only provides for now a way to display a fixed
-           width text output summary message, a list of warnings, and a list
-           of objects created (each with descriptions). @optional warnings
+        :returns: instance of type "Report" (A simple Report of a method run
+           in KBase. It only provides for now a way to display a fixed width
+           text output summary message, a list of warnings, and a list of
+           objects created (each with descriptions). @optional warnings
            file_links html_links direct_html direct_html_link_index @metadata
            ws length(warnings) as Warnings @metadata ws length(text_message)
            as Size(characters) @metadata ws length(objects_created) as
@@ -84,13 +82,12 @@ class KBparallel:
            "handle" of type "handle_ref" (Reference to a handle @id handle),
            parameter "description" of String, parameter "name" of String,
            parameter "URL" of String, parameter "direct_html" of String,
-           parameter "direct_html_link_index" of Long, parameter "msg" of
-           String
+           parameter "direct_html_link_index" of Long
         """
         # ctx is the context object
         # return variables are: rep
         #BEGIN run
-        print( "Hi this is KBparallel.run() input_params are")
+        print( "Hi this is KBParallel.run() input_params are")
         pprint( input_params )
 
         token = ctx['token']
@@ -100,7 +97,7 @@ class KBparallel:
 
 
         #instantiate ManyHellos client here
-        print( "about to initiate ManyHellos() class .." )
+        print( "about to initiate client .." )
         client = _BaseClient(self.callbackURL, timeout=self.config['time_limit'], service_ver=service_ver, token=token)
 
         # using manyHellos initializer (bad programming by Sean)
@@ -121,7 +118,7 @@ class KBparallel:
                                                                input_params['method_name']),
                                        input_params["prepare_params"], 
                                        context=None)
-        print( "back in test_manyHellos")
+        print( "back in run")
         tasks = tasks_ret[0]
         pprint( tasks )
 
@@ -161,7 +158,8 @@ class KBparallel:
     def status(self, ctx, input_params):
         """
         :param input_params: instance of type "KBparallelstatusInputParams"
-           (status() method) -> structure: parameter "joblist" of list of Long
+           (status() method) -> structure: parameter "joblist" of list of
+           String
         :returns: instance of type "KBparallelstatusOutputObj" -> structure:
            parameter "num_jobs_checked" of Long, parameter "jobstatus" of
            list of String
@@ -169,7 +167,7 @@ class KBparallel:
         # ctx is the context object
         # return variables are: ret
         #BEGIN status
-        { notyet( "status" )
+        ret = notyet( "status" )
         #END status
 
         # At some point might do deeper type checking...

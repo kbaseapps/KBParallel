@@ -14,7 +14,9 @@ import us.kbase.kbasereport.Report;
 
 /**
  * <p>Original spec-file type: KBparallelOutputObj</p>
- * 
+ * <pre>
+ * SJ: the following is not necessary
+ * </pre>
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)

@@ -27,36 +27,36 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class KBparallelstatusInputParams {
 
     @JsonProperty("joblist")
-    private List<Long> joblist;
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    private List<String> joblist;
+    private Map<java.lang.String, Object> additionalProperties = new HashMap<java.lang.String, Object>();
 
     @JsonProperty("joblist")
-    public List<Long> getJoblist() {
+    public List<String> getJoblist() {
         return joblist;
     }
 
     @JsonProperty("joblist")
-    public void setJoblist(List<Long> joblist) {
+    public void setJoblist(List<String> joblist) {
         this.joblist = joblist;
     }
 
-    public KBparallelstatusInputParams withJoblist(List<Long> joblist) {
+    public KBparallelstatusInputParams withJoblist(List<String> joblist) {
         this.joblist = joblist;
         return this;
     }
 
     @JsonAnyGetter
-    public Map<String, Object> getAdditionalProperties() {
+    public Map<java.lang.String, Object> getAdditionalProperties() {
         return this.additionalProperties;
     }
 
     @JsonAnySetter
-    public void setAdditionalProperties(String name, Object value) {
+    public void setAdditionalProperties(java.lang.String name, Object value) {
         this.additionalProperties.put(name, value);
     }
 
     @Override
-    public String toString() {
+    public java.lang.String toString() {
         return ((((("KBparallelstatusInputParams"+" [joblist=")+ joblist)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
