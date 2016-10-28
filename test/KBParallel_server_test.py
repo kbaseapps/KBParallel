@@ -102,6 +102,8 @@ class KBParallelTest(unittest.TestCase):
         in_params    = { 'input_params.module_name': 'ManyHellos',
                          'input_params.method_name': 'manyHellos',
                          'input_params.service_ver': 'beta',
+                         'input_params.prepare_params.0.msg': "Hello_",
+                         'input_params.prepare_params.0.workspace': "sjyoo:1440535806637",
                          'input_params.prepare_params.0.num_jobs': "3",
                          'input_params.collect_params.0.num_jobs': "3"
                        }

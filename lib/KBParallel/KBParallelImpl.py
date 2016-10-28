@@ -209,6 +209,7 @@ class KBParallel:
              else:
 	         target[path[1]] = input_params[key]
         rep = self.run(ctx,target)        
+        rep = rep[0]
 
         #END run_narrative
 
