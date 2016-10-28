@@ -30,7 +30,7 @@ class KBParallel:
     ######################################### noqa
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/sean-mccorkle/KBparallel"
-    GIT_COMMIT_HASH = "65b7bd06681ced34952402074f12f8f2adad6192"
+    GIT_COMMIT_HASH = "f496bf26180b7247b699b10b87d13b20ec4c610e"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
