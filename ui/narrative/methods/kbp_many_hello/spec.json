@@ -41,31 +41,31 @@
             "input_mapping": [
                 {
                     "constant_value" : "ManyHellos",
-                    "target_property" : "input_parameter.module_name"
+                    "target_property" : "input_params.module_name"
                 },
                 {
                     "constant_value" : "manyHellos",
-                    "target_property" : "input_parameter.method_name"
+                    "target_property" : "input_params.method_name"
                 },
                 {
                     "constant_value" : "beta",
-                    "target_property" : "input_parameter.service_ver"
+                    "target_property" : "input_params.service_ver"
                 },
                 {
-                    "input_parameter": "said",
-                    "target_property": "input_parameter.prepare_params.msg"
+                    "input_params": "said",
+                    "target_property": "input_params.prepare_params.msg"
                 },
                 {
-                    "input_parameter": "njob",
-                    "target_property": "input_parameter.prepare_params.num_jobs"
+                    "input_params": "njob",
+                    "target_property": "input_params.prepare_params.num_jobs"
                 },
                 {
-                    "input_parameter": "njob",
-                    "target_property": "input_parameter.collect_params.num_jobs"
+                    "input_params": "njob",
+                    "target_property": "input_params.collect_params.num_jobs"
                 },
                 {
                     "narrative_system_variable": "workspace",
-                    "target_property": "input_parameter.prepare_params.workspace"
+                    "target_property": "input_params.prepare_params.workspace"
                 }
             ],
             "output_mapping": [
@@ -74,7 +74,7 @@
                     "target_property": "output"
                 },
                 {
-                    "input_parameter": "said",
+                    "input_params": "said",
                     "target_property": "input"
                 },
                 {
