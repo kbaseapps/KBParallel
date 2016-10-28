@@ -111,7 +111,7 @@ class KBParallel:
                                        service_ver = service_ver,
                                        context=None)
         print( "back in run")
-        tasks = tasks_ret[0]
+        tasks = tasks_ret
         pprint( tasks )
 
         # initiate NJS wrapper
