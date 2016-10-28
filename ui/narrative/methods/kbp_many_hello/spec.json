@@ -52,15 +52,15 @@
                     "target_property" : "input_params.service_ver"
                 },
                 {
-                    "input_params": "said",
+                    "input_parameter": "said",
                     "target_property": "input_params.prepare_params.msg"
                 },
                 {
-                    "input_params": "njob",
+                    "input_parameter": "njob",
                     "target_property": "input_params.prepare_params.num_jobs"
                 },
                 {
-                    "input_params": "njob",
+                    "input_parameter": "njob",
                     "target_property": "input_params.collect_params.num_jobs"
                 },
                 {
