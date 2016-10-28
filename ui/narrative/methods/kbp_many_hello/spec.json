@@ -74,7 +74,7 @@
                     "target_property": "output"
                 },
                 {
-                    "input_params": "said",
+                    "input_parameter": "said",
                     "target_property": "input"
                 },
                 {
