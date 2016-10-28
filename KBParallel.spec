@@ -30,6 +30,9 @@ module KBParallel {
 
     async funcdef run( KBParallelrunInputParams input_params ) returns( KBaseReport.Report rep ) authentication required;
 
+    /* Narrative Method Spec call helper function */
+    async funcdef run_narrative( KBParallelrunInputParams input_params ) returns( KBaseReport.Report rep ) authentication required;
+
     /*
        status() method
     */

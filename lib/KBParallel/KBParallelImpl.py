@@ -30,7 +30,7 @@ class KBParallel:
     ######################################### noqa
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/sean-mccorkle/KBparallel"
-    GIT_COMMIT_HASH = "eb8473ce2b5b8a24b1494092091d9e800366e51d"
+    GIT_COMMIT_HASH = "65b7bd06681ced34952402074f12f8f2adad6192"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -144,6 +144,77 @@ class KBParallel:
         # At some point might do deeper type checking...
         if not isinstance(rep, dict):
             raise ValueError('Method run return value ' +
+                             'rep is not type dict as required.')
+        # return the results
+        return [rep]
+
+    def run_narrative(self, ctx, input_params):
+        """
+        Narrative Method Spec call helper function
+        :param input_params: instance of type "KBParallelrunInputParams"
+           (run() method) -> structure: parameter "module_name" of String,
+           parameter "method_name" of String, parameter "service_ver" of
+           String, parameter "prepare_params" of list of unspecified object,
+           parameter "collect_params" of list of unspecified object,
+           parameter "client_class_name" of String, parameter "time_limit" of
+           Long
+        :returns: instance of type "Report" (A simple Report of a method run
+           in KBase. It only provides for now a way to display a fixed width
+           text output summary message, a list of warnings, and a list of
+           objects created (each with descriptions). @optional warnings
+           file_links html_links direct_html direct_html_link_index @metadata
+           ws length(warnings) as Warnings @metadata ws length(text_message)
+           as Size(characters) @metadata ws length(objects_created) as
+           Objects Created) -> structure: parameter "text_message" of String,
+           parameter "warnings" of list of String, parameter
+           "objects_created" of list of type "WorkspaceObject" (Represents a
+           Workspace object with some brief description text that can be
+           associated with the object. @optional description) -> structure:
+           parameter "ref" of type "ws_id" (@id ws), parameter "description"
+           of String, parameter "file_links" of list of type "LinkedFile"
+           (Represents a file or html archive that the report should like to
+           @optional description) -> structure: parameter "handle" of type
+           "handle_ref" (Reference to a handle @id handle), parameter
+           "description" of String, parameter "name" of String, parameter
+           "URL" of String, parameter "html_links" of list of type
+           "LinkedFile" (Represents a file or html archive that the report
+           should like to @optional description) -> structure: parameter
+           "handle" of type "handle_ref" (Reference to a handle @id handle),
+           parameter "description" of String, parameter "name" of String,
+           parameter "URL" of String, parameter "direct_html" of String,
+           parameter "direct_html_link_index" of Long
+        """
+        # ctx is the context object
+        # return variables are: rep
+        #BEGIN run_narrative
+
+	# TODO: at the moment, one level generalization
+        target ={'prepare_params' : [{}], 'collect_params' : [{}]}
+        pprint(input_params)
+        for key in input_params:
+             path = key.split(".")
+             print "processing:" + key
+             pprint(path)
+	     if len(path) < 2:
+                 raise ValueError("run() parameter must be at least two depth".format(path[0]))
+             if path[0] != "input_params":
+                 raise ValueError("{0} is not expected the first parameter path".format(path[0]))
+             if path[1] in ["prepare_params", "collect_params"]:
+	         if len(path) != 4:
+                     raise ValueError("run() prepara or collect parameter must be four depth".format(path[0]))
+                 idx = int(path[2])
+                 while idx < len(target[path[1]])-1:
+		     target[path[1]].append({})
+		 target[path[1]][idx][path[3]] = input_params[key]
+             else:
+	         target[path[1]] = input_params[key]
+        rep = self.run(ctx,target)        
+
+        #END run_narrative
+
+        # At some point might do deeper type checking...
+        if not isinstance(rep, dict):
+            raise ValueError('Method run_narrative return value ' +
                              'rep is not type dict as required.')
         # return the results
         return [rep]

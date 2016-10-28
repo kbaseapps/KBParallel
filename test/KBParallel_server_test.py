@@ -99,7 +99,14 @@ class KBParallelTest(unittest.TestCase):
                          'prepare_params': [{'num_jobs' : 3}],
                          'collect_params': [{'num_jobs' : 3}]
                        }
-        res= self.getImpl().run( self.getContext(), input_params )
+        in_params    = { 'input_params.module_name': 'ManyHellos',
+                         'input_params.method_name': 'manyHellos',
+                         'input_params.service_ver': 'beta',
+                         'input_params.prepare_params.0.num_jobs': "3",
+                         'input_params.collect_params.0.num_jobs': "3"
+                       }
+        #res= self.getImpl().run( self.getContext(), input_params )
+        res= self.getImpl().run_narrative( self.getContext(), in_params )
         pprint( res )
 
         #

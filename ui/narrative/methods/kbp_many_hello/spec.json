@@ -1,0 +1,88 @@
+{
+    "ver": "0.0.1",
+    "authors": [
+        "mccorkle", "sjyoo"
+    ],
+    "contact": "",
+    "categories": ["active"],
+    "widgets": {
+        "input": null,
+        "output": null
+    },
+    "parameters": [ 
+        {
+            "id": "said",
+            "optional": false,
+            "advanced": false,
+            "allow_multiple": false,
+            "default_values": [ "Hi~~" ],
+            "field_type": "text",
+            "text_options": {
+                "valid_ws_types": [ ]
+            }
+        },
+        {
+            "id": "njob",
+            "optional": false,
+            "advanced": false,
+            "allow_multiple": false,
+            "default_values": [ "3" ],
+            "field_type": "text",
+            "text_options": {
+                "validate_as": "int"
+            }
+        }
+    ],
+    "behavior": {
+        "service-mapping": {
+            "url": "",
+            "name": "KBParallel",
+            "method": "run_narrative",
+            "input_mapping": [
+                {
+                    "constant_value" : "ManyHellos",
+                    "target_property" : "input_parameter.module_name"
+                },
+                {
+                    "constant_value" : "manyHellos",
+                    "target_property" : "input_parameter.method_name"
+                },
+                {
+                    "constant_value" : "beta",
+                    "target_property" : "input_parameter.service_ver"
+                },
+                {
+                    "input_parameter": "said",
+                    "target_property": "input_parameter.prepare_params.msg"
+                },
+                {
+                    "input_parameter": "njob",
+                    "target_property": "input_parameter.prepare_params.num_jobs"
+                },
+                {
+                    "input_parameter": "njob",
+                    "target_property": "input_parameter.collect_params.num_jobs"
+                },
+                {
+                    "narrative_system_variable": "workspace",
+                    "target_property": "input_parameter.prepare_params.workspace"
+                }
+            ],
+            "output_mapping": [
+                {
+                    "service_method_output_path": [0],
+                    "target_property": "output"
+                },
+                {
+                    "input_parameter": "said",
+                    "target_property": "input"
+                },
+                {
+                    "narrative_system_variable": "workspace",
+                    "target_property": "workspaceName"
+                }
+            ]
+        }
+    },
+    "job_id_output_field": "docker"
+}
