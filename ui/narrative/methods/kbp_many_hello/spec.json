@@ -53,19 +53,19 @@
                 },
                 {
                     "input_parameter": "said",
-                    "target_property": "input_params.prepare_params.msg"
+                    "target_property": "input_params.prepare_params.0.msg"
                 },
                 {
                     "input_parameter": "njob",
-                    "target_property": "input_params.prepare_params.num_jobs"
+                    "target_property": "input_params.prepare_params.0.num_jobs"
                 },
                 {
                     "input_parameter": "njob",
-                    "target_property": "input_params.collect_params.num_jobs"
+                    "target_property": "input_params.collect_params.0.num_jobs"
                 },
                 {
                     "narrative_system_variable": "workspace",
-                    "target_property": "input_params.prepare_params.workspace"
+                    "target_property": "input_params.prepare_params.0.workspace"
                 }
             ],
             "output_mapping": [
