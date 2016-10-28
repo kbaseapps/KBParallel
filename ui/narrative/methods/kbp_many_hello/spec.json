@@ -15,7 +15,7 @@
             "optional": false,
             "advanced": false,
             "allow_multiple": false,
-            "default_values": [ "Hi_" ],
+            "default_values": [ "Hi" ],
             "field_type": "text",
             "text_options": {
                 "valid_ws_types": [ ]
