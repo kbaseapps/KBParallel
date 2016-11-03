@@ -13,7 +13,7 @@ import us.kbase.kbasereport.Report;
 
 
 /**
- * <p>Original spec-file type: KBparallelOutputObj</p>
+ * <p>Original spec-file type: KBParallelOutputObj</p>
  * <pre>
  * SJ: the following is not necessary
  * </pre>
@@ -25,7 +25,7 @@ import us.kbase.kbasereport.Report;
     "report",
     "msg"
 })
-public class KBparallelOutputObj {
+public class KBParallelOutputObj {
 
     /**
      * <p>Original spec-file type: Report</p>
@@ -82,7 +82,7 @@ public class KBparallelOutputObj {
         this.report = report;
     }
 
-    public KBparallelOutputObj withReport(Report report) {
+    public KBParallelOutputObj withReport(Report report) {
         this.report = report;
         return this;
     }
@@ -97,7 +97,7 @@ public class KBparallelOutputObj {
         this.msg = msg;
     }
 
-    public KBparallelOutputObj withMsg(String msg) {
+    public KBParallelOutputObj withMsg(String msg) {
         this.msg = msg;
         return this;
     }
@@ -114,7 +114,7 @@ public class KBparallelOutputObj {
 
     @Override
     public String toString() {
-        return ((((((("KBparallelOutputObj"+" [report=")+ report)+", msg=")+ msg)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((("KBParallelOutputObj"+" [report=")+ report)+", msg=")+ msg)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

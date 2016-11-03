@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * <p>Original spec-file type: KBparallelstatusInputParams</p>
+ * <p>Original spec-file type: KBParallelstatusInputParams</p>
  * <pre>
  * status() method
  * </pre>
@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({
     "joblist"
 })
-public class KBparallelstatusInputParams {
+public class KBParallelstatusInputParams {
 
     @JsonProperty("joblist")
     private List<String> joblist;
@@ -40,7 +40,7 @@ public class KBparallelstatusInputParams {
         this.joblist = joblist;
     }
 
-    public KBparallelstatusInputParams withJoblist(List<String> joblist) {
+    public KBParallelstatusInputParams withJoblist(List<String> joblist) {
         this.joblist = joblist;
         return this;
     }
@@ -57,7 +57,7 @@ public class KBparallelstatusInputParams {
 
     @Override
     public java.lang.String toString() {
-        return ((((("KBparallelstatusInputParams"+" [joblist=")+ joblist)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((("KBParallelstatusInputParams"+" [joblist=")+ joblist)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

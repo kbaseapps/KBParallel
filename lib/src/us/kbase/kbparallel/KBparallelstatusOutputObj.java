@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * <p>Original spec-file type: KBparallelstatusOutputObj</p>
+ * <p>Original spec-file type: KBParallelstatusOutputObj</p>
  * 
  * 
  */
@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "num_jobs_checked",
     "jobstatus"
 })
-public class KBparallelstatusOutputObj {
+public class KBParallelstatusOutputObj {
 
     @JsonProperty("num_jobs_checked")
     private Long numJobsChecked;
@@ -41,7 +41,7 @@ public class KBparallelstatusOutputObj {
         this.numJobsChecked = numJobsChecked;
     }
 
-    public KBparallelstatusOutputObj withNumJobsChecked(Long numJobsChecked) {
+    public KBParallelstatusOutputObj withNumJobsChecked(Long numJobsChecked) {
         this.numJobsChecked = numJobsChecked;
         return this;
     }
@@ -56,7 +56,7 @@ public class KBparallelstatusOutputObj {
         this.jobstatus = jobstatus;
     }
 
-    public KBparallelstatusOutputObj withJobstatus(List<String> jobstatus) {
+    public KBParallelstatusOutputObj withJobstatus(List<String> jobstatus) {
         this.jobstatus = jobstatus;
         return this;
     }
@@ -73,7 +73,7 @@ public class KBparallelstatusOutputObj {
 
     @Override
     public java.lang.String toString() {
-        return ((((((("KBparallelstatusOutputObj"+" [numJobsChecked=")+ numJobsChecked)+", jobstatus=")+ jobstatus)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((("KBParallelstatusOutputObj"+" [numJobsChecked=")+ numJobsChecked)+", jobstatus=")+ jobstatus)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

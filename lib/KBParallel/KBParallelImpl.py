@@ -10,6 +10,7 @@ except:
 import time
 import os
 from biokbase.njs_wrapper.client import NarrativeJobService as NJS
+
 #END_HEADER
 
 
@@ -28,25 +29,38 @@ class KBParallel:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "0.0.1"
-    GIT_URL = "https://github.com/sean-mccorkle/KBparallel"
-    GIT_COMMIT_HASH = "f496bf26180b7247b699b10b87d13b20ec4c610e"
+    VERSION = "0.0.7"
+    GIT_URL = "https://github.com/sean-mccorkle/KBparallel.git"
+    GIT_COMMIT_HASH = "22046f4034c26dc2f380caa3478e80fe4895545b"
 
     #BEGIN_CLASS_HEADER
+
+    def notyet( msg ):
+        return( msg + " is not implemented yet" )
+
+    # return a list of vals where corresponding values of include are True
+    def reduce_list( vals, include ):
+        result_vals = []
+        for j in range( len( vals ) ):
+            if include[j]:
+                result_vals.append( vals[j])
+        return( result_vals )
+
     #END_CLASS_HEADER
 
     # config contains contents of config file in a hash or None if it couldn't
     # be found
+
     def __init__(self, config):
         #BEGIN_CONSTRUCTOR
         self.callbackURL = os.environ['SDK_CALLBACK_URL']
         self.config = config
+        self.checkwait = 1     # seconds between checkjob calls
 
         # set default time limit
         if not 'time_limit' in config:
-          self.config['time_limit']  = 5000000
+          self.config['time_limit']  = 1  # 5000000
 
-        
         #END_CONSTRUCTOR
         pass
 
@@ -95,7 +109,7 @@ class KBParallel:
         token = ctx['token']
         service_ver = "beta"
         if 'service_ver' in input_params and input_params['service_ver'] is not None: 
-          service_ver = input_params['service_ver'] 
+            service_ver = input_params['service_ver'] 
 
 
         #instantiate ManyHellos client here
@@ -111,13 +125,16 @@ class KBParallel:
                                        service_ver = service_ver,
                                        context=None)
         print( "back in run")
-        tasks = tasks_ret
+        tasks = tasks_ret        # Question: why do we need tasks_ret at all?
         pprint( tasks )
 
         # initiate NJS wrapper
         print( "initiating NJS wrapper")
         njs = NJS( url=self.config['njs-wrapper-url'], token=token )  
-        pprint( njs)
+        pprint( njs )
+        jobid_list = []
+        job_running_list = []
+        njobs = 0
         for task in tasks:
             pprint( ["   launching task", task]  )
             #r1 = mh.manyHellos_runEach( ctx, task )
@@ -127,7 +144,52 @@ class KBParallel:
                                    'service_ver':  service_ver} 
                                )
             print( "job_id", jobid )
+            jobid_list.append( jobid )
+            job_running_list.append( True )
+            njobs = njobs + 1
 
+        # Polling loop to see when job is finished
+        #   TODO:  put in timout and cancel job here!!!
+
+        print( "polling ", njobs, " NJS job status" )
+        pprint( job_running_list )
+        njobs_remaining = njobs
+        timeout = time.time() + 60 * self.config['time_limit']
+
+        while njobs_remaining > 0:
+
+            # check for timeout first
+            if time.time() > timeout:
+                print "*************TIMEOUT****************"
+                for jobid in reduce_list( jobid_list, job_running_list ):
+                    njs.cancel_job( jobid )
+                raise Exception( "jobs canceled because of failure")
+
+            # poll each job
+            for j in range( 0, njobs ):
+                if ( job_running_list[j] ):     # only poll those which are still running
+                    job_state_desc = njs.check_job( jobid_list[j] )
+                    pprint( job_state_desc )
+                    if (    job_state_desc["finished"] != 0  
+                         or job_state_desc["job_state"] == 'completed'
+                         or job_state_desc["job_state"] == 'suspended' ):
+                        print( "**************job ", j, " is done***********" )
+                        job_running_list[j] = False
+                        njobs_remaining = njobs_remaining - 1
+                        if  "error" in job_state_desc:
+                            print( "************** job ", j, " has crashed*********" )
+                            # kill the jobs
+                            for jobid in reduce_list( jobid_list, job_running_list ):
+                                njs.cancel_job( jobid )
+                            raise Exception( "jobs canceled because of failure")
+
+            time.sleep( self.checkwait )
+            #Aany failure means cancel each job make sure its complete not suspend
+
+        # at this point, NJS informed us that job is finished, must now check error status
+
+        # Question: best way to determine a successful completion or not from the
+        #           jobs state
 
         print( "about to invoke collect()" )
         res = client.call_method("{0}.{1}_collect".format(input_params['module_name'], 
@@ -188,26 +250,26 @@ class KBParallel:
         # return variables are: rep
         #BEGIN run_narrative
 
-	# TODO: at the moment, one level generalization
+        # TODO: at the moment, one level generalization
         target ={'prepare_params' : [{}], 'collect_params' : [{}]}
         pprint(input_params)
         for key in input_params:
              path = key.split(".")
              print "processing:" + key
              pprint(path)
-	     if len(path) < 2:
+             if len(path) < 2:
                  raise ValueError("run() parameter must be at least two depth".format(path[0]))
              if path[0] != "input_params":
                  raise ValueError("{0} is not expected the first parameter path".format(path[0]))
              if path[1] in ["prepare_params", "collect_params"]:
-	         if len(path) != 4:
+                 if len(path) != 4:
                      raise ValueError("run() prepara or collect parameter must be four depth".format(path[0]))
                  idx = int(path[2])
                  while idx < len(target[path[1]])-1:
-		     target[path[1]].append({})
-		 target[path[1]][idx][path[3]] = input_params[key]
+                     target[path[1]].append({})
+                 target[path[1]][idx][path[3]] = input_params[key]
              else:
-	         target[path[1]] = input_params[key]
+                 target[path[1]] = input_params[key]
         rep = self.run(ctx,target)        
         rep = rep[0]
 
