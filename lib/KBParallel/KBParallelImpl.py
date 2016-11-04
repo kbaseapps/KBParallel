@@ -30,8 +30,8 @@ class KBParallel:
     # the latter method is running.
     ######################################### noqa
     VERSION = "0.0.7"
-    GIT_URL = "https://github.com/sean-mccorkle/KBparallel.git"
-    GIT_COMMIT_HASH = "22046f4034c26dc2f380caa3478e80fe4895545b"
+    GIT_URL = "https://github.com/sean-mccorkle/KBparallel"
+    GIT_COMMIT_HASH = "85c41701fcbd8d0605645b5171539cd31dbe0e03"
 
     #BEGIN_CLASS_HEADER
 
@@ -50,7 +50,6 @@ class KBParallel:
 
     # config contains contents of config file in a hash or None if it couldn't
     # be found
-
     def __init__(self, config):
         #BEGIN_CONSTRUCTOR
         self.callbackURL = os.environ['SDK_CALLBACK_URL']
@@ -114,7 +113,7 @@ class KBParallel:
 
         #instantiate ManyHellos client here
         print( "about to initiate client .." )
-        client = _BaseClient(self.callbackURL, timeout=self.config['time_limit'], token=token)
+        client = _BaseClient(self.callbackURL, token=token)
 
 
         # issue prepare call
