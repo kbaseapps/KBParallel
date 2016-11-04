@@ -11,6 +11,19 @@ import time
 import os
 from biokbase.njs_wrapper.client import NarrativeJobService as NJS
 
+
+def notyet( msg ):
+    return( msg + " is not implemented yet" )
+
+# return a list of vals where corresponding values of include are True
+def reduce_list( vals, include ):
+    result_vals = []
+    for j in range( len( vals ) ):
+        if include[j]:
+            result_vals.append( vals[j])
+    return( result_vals )
+
+
 #END_HEADER
 
 
@@ -34,18 +47,6 @@ class KBParallel:
     GIT_COMMIT_HASH = "85c41701fcbd8d0605645b5171539cd31dbe0e03"
 
     #BEGIN_CLASS_HEADER
-
-    def notyet( msg ):
-        return( msg + " is not implemented yet" )
-
-    # return a list of vals where corresponding values of include are True
-    def reduce_list( vals, include ):
-        result_vals = []
-        for j in range( len( vals ) ):
-            if include[j]:
-                result_vals.append( vals[j])
-        return( result_vals )
-
     #END_CLASS_HEADER
 
     # config contains contents of config file in a hash or None if it couldn't
@@ -58,7 +59,7 @@ class KBParallel:
 
         # set default time limit
         if not 'time_limit' in config:
-          self.config['time_limit']  = 1  # 5000000
+          self.config['time_limit'] = 5000000
 
         #END_CONSTRUCTOR
         pass
@@ -131,8 +132,10 @@ class KBParallel:
         print( "initiating NJS wrapper")
         njs = NJS( url=self.config['njs-wrapper-url'], token=token )  
         pprint( njs )
-        jobid_list = []
-        job_running_list = []
+
+        jobid_list = []         # list of jobids when launched
+        job_running_list = []   # list of booleans which are True if the job is queued or running, False when completed
+        job_timeout_list = []   # list of job timeout values, None until the job starts
         njobs = 0
         for task in tasks:
             pprint( ["   launching task", task]  )
@@ -145,45 +148,50 @@ class KBParallel:
             print( "job_id", jobid )
             jobid_list.append( jobid )
             job_running_list.append( True )
+            job_timeout_list.append( None )
             njobs = njobs + 1
 
         # Polling loop to see when job is finished
-        #   TODO:  put in timout and cancel job here!!!
 
         print( "polling ", njobs, " NJS job status" )
         pprint( job_running_list )
-        njobs_remaining = njobs
-        timeout = time.time() + 60 * self.config['time_limit']
+        njobs_remaining = njobs      # this will count down to 0 when all jobs completed
 
         while njobs_remaining > 0:
 
-            # check for timeout first
-            if time.time() > timeout:
-                print "*************TIMEOUT****************"
-                for jobid in reduce_list( jobid_list, job_running_list ):
-                    njs.cancel_job( jobid )
-                raise Exception( "jobs canceled because of failure")
-
             # poll each job
             for j in range( 0, njobs ):
-                if ( job_running_list[j] ):     # only poll those which are still running
+                if ( job_running_list[j] ):     # only consider those which are still running
                     job_state_desc = njs.check_job( jobid_list[j] )
                     pprint( job_state_desc )
-                    if (    job_state_desc["finished"] != 0  
-                         or job_state_desc["job_state"] == 'completed'
+
+                    if (    job_state_desc["finished"] != 0                    # has this job completed
+                         or job_state_desc["job_state"] == 'completed'         # successfully or not?
                          or job_state_desc["job_state"] == 'suspended' ):
                         print( "**************job ", j, " is done***********" )
                         job_running_list[j] = False
                         njobs_remaining = njobs_remaining - 1
-                        if  "error" in job_state_desc:
+
+                        if  "error" in job_state_desc:                                # if it crashed, 
                             print( "************** job ", j, " has crashed*********" )
                             # kill the jobs
                             for jobid in reduce_list( jobid_list, job_running_list ):
-                                njs.cancel_job( jobid )
+                                njs.cancel_job( { 'job_id': jobid } )
                             raise Exception( "jobs canceled because of failure")
+                    else:                                                            # if its running, check for timeout
+                        if  job_state_desc["job_state"] == 'in-progress' :
+                            print( "checking timeout for this job" )
+                            # check timeout of job
+                            if job_timeout_list[j] == None :
+                                job_timeout_list[j] = time.time() + 60 * self.config['time_limit']   # start the clock if just started
+                            if time.time() > job_timeout_list[j] :
+                                print "*************TIMEOUT****************"
+                                for jobid in reduce_list( jobid_list, job_running_list ):
+                                    njs.cancel_job( { 'job_id': jobid } )
+                                raise Exception( "jobs canceled because of timout")
 
             time.sleep( self.checkwait )
-            #Aany failure means cancel each job make sure its complete not suspend
+
 
         # at this point, NJS informed us that job is finished, must now check error status
 
