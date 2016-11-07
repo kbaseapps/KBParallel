@@ -44,7 +44,7 @@ class KBParallel:
     ######################################### noqa
     VERSION = "0.0.7"
     GIT_URL = "https://github.com/sean-mccorkle/KBparallel"
-    GIT_COMMIT_HASH = "85c41701fcbd8d0605645b5171539cd31dbe0e03"
+    GIT_COMMIT_HASH = "f6f87a2564155925d2cf8c2b072bc210c4c7a6c5"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -59,7 +59,7 @@ class KBParallel:
 
         # set default time limit
         if not 'time_limit' in config:
-          self.config['time_limit'] = 5000000
+            self.config['time_limit'] = 5000000
 
         #END_CONSTRUCTOR
         pass
@@ -68,12 +68,25 @@ class KBParallel:
     def run(self, ctx, input_params):
         """
         :param input_params: instance of type "KBParallelrunInputParams"
-           (run() method) -> structure: parameter "module_name" of String,
-           parameter "method_name" of String, parameter "service_ver" of
-           String, parameter "prepare_params" of list of unspecified object,
-           parameter "collect_params" of list of unspecified object,
-           parameter "client_class_name" of String, parameter "time_limit" of
-           Long
+           (Input parameters for run() method. module_name - SDK module name
+           (ie. ManyHellos, RNAseq), method_name - method in SDK module
+           (TopHatcall, Hiseqcall etc each will have own _prepare(),
+           _runEach(), _collect() methods defined), service_ver - optional
+           version of SDK module (may be dev/beta/release, or symantic
+           version or particular git commit hash), it's release by default,
+           is_local - optional flag defining way of scheduling sub-job, in
+           case is_local=false sub-jobs are scheduled against remote
+           execution engine, if is_local=true then sub_jobs are run as local
+           functions through CALLBACK mechanism, default value is false,
+           global_input - input data which is supposed to be sent to
+           <module_name>.<method_name>_prepare() method, max_num_jobs -
+           maximum number of sub-jobs, equals to 5 by default, time_limit -
+           time limit in seconds, equals to 5000 by default.) -> structure:
+           parameter "module_name" of String, parameter "method_name" of
+           String, parameter "service_ver" of String, parameter "is_local" of
+           type "boolean" (A boolean - 0 for false, 1 for true. @range (0,
+           1)), parameter "global_input" of list of unspecified object,
+           parameter "max_num_jobs" of Long, parameter "time_limit" of Long
         :returns: instance of type "Report" (A simple Report of a method run
            in KBase. It only provides for now a way to display a fixed width
            text output summary message, a list of warnings, and a list of
@@ -107,6 +120,9 @@ class KBParallel:
         pprint( input_params )
 
         token = ctx['token']
+        module_name = input_params['module_name']
+        method_name = input_params['method_name']
+        module_method = module_name + '.' + method_name
         service_ver = "beta"
         if 'service_ver' in input_params and input_params['service_ver'] is not None: 
             service_ver = input_params['service_ver'] 
@@ -119,9 +135,8 @@ class KBParallel:
 
         # issue prepare call
         print( "about to invoke prepare()")
-        tasks_ret = client.call_method("{0}.{1}_prepare".format(input_params['module_name'], 
-                                                               input_params['method_name']),
-                                       input_params["prepare_params"], 
+        tasks_ret = client.call_method(module_method + "_prepare",
+                                       input_params["global_params"], 
                                        service_ver = service_ver,
                                        context=None)
         print( "back in run")
@@ -129,69 +144,86 @@ class KBParallel:
         pprint( tasks )
 
         # initiate NJS wrapper
-        print( "initiating NJS wrapper")
-        njs = NJS( url=self.config['njs-wrapper-url'], token=token )  
-        pprint( njs )
+        print( "initiating Execution Engine")
+        exec_engine_url = None
+        remote_ee_client = None
+        is_local = ('is_local' in input_params and input_params['is_local'] == 1)
+        if is_local:
+            exec_engine_url = self.callbackURL
+        else:
+            exec_engine_url = self.config['njs-wrapper-url']
+            remote_ee_client = NJS(url=self.config['njs-wrapper-url'], token=token)
+        exec_engine_client = _BaseClient(exec_engine_url, token=token)
 
         jobid_list = []         # list of jobids when launched
         job_running_list = []   # list of booleans which are True if the job is queued or running, False when completed
         job_timeout_list = []   # list of job timeout values, None until the job starts
         njobs = 0
+        job_input_result_map = {}
         for task in tasks:
             pprint( ["   launching task", task]  )
             #r1 = mh.manyHellos_runEach( ctx, task )
             #pprint( r1 )
-            jobid = njs.run_job( { 'method': "{0}.{1}_runEach".format(input_params['module_name'], input_params['method_name']),
-                                   'params': [task], 
-                                   'service_ver':  service_ver} 
-                               )
+            
+            jobid = exec_engine_client._submit_job(module_method + "_runEach",
+                                                   [task], 
+                                                   service_ver=service_ver)
             print( "job_id", jobid )
             jobid_list.append( jobid )
             job_running_list.append( True )
             job_timeout_list.append( None )
+            job_input_result_map[jobid] = {"input": [task]}
             njobs = njobs + 1
 
         # Polling loop to see when job is finished
 
-        print( "polling ", njobs, " NJS job status" )
-        pprint( job_running_list )
+        print("polling ", njobs, " NJS job status")
+        pprint(job_running_list)
         njobs_remaining = njobs      # this will count down to 0 when all jobs completed
-
-        while njobs_remaining > 0:
-
-            # poll each job
-            for j in range( 0, njobs ):
-                if ( job_running_list[j] ):     # only consider those which are still running
-                    job_state_desc = njs.check_job( jobid_list[j] )
-                    pprint( job_state_desc )
-
-                    if (    job_state_desc["finished"] != 0                    # has this job completed
-                         or job_state_desc["job_state"] == 'completed'         # successfully or not?
-                         or job_state_desc["job_state"] == 'suspended' ):
-                        print( "**************job ", j, " is done***********" )
-                        job_running_list[j] = False
-                        njobs_remaining = njobs_remaining - 1
-
-                        if  "error" in job_state_desc:                                # if it crashed, 
-                            print( "************** job ", j, " has crashed*********" )
-                            # kill the jobs
-                            for jobid in reduce_list( jobid_list, job_running_list ):
-                                njs.cancel_job( { 'job_id': jobid } )
-                            raise Exception( "jobs canceled because of failure")
-                    else:                                                            # if its running, check for timeout
-                        if  job_state_desc["job_state"] == 'in-progress' :
+        try:
+            while njobs_remaining > 0:
+    
+                # poll each job
+                for j in range(0, njobs):
+                    if job_running_list[j]:     # only consider those which are still running
+                        job_state_desc = exec_engine_client._check_job(module_name, jobid_list[j] )
+                        pprint( job_state_desc )
+    
+                        if job_state_desc["finished"] == 1: # has this job completed
+                            print( "**************job ", j, " is done***********" )
+                            job_running_list[j] = False
+                            njobs_remaining = njobs_remaining - 1
+    
+                            if "error" in job_state_desc:                                # if it crashed, 
+                                print( "************** job ", j, " has crashed*********" )
+                                raise Exception("jobs canceled because of failure")
+                            elif 'result' in job_state_desc:
+                                job_input_result_map[jobid_list[j]]['output'] = job_state_desc['result']
+                            else:
+                                raise Exception("Unexpected job state (no error/result fields")
+                        else:                                                            # if its running, check for timeout
                             print( "checking timeout for this job" )
                             # check timeout of job
                             if job_timeout_list[j] == None :
                                 job_timeout_list[j] = time.time() + 60 * self.config['time_limit']   # start the clock if just started
                             if time.time() > job_timeout_list[j] :
                                 print "*************TIMEOUT****************"
-                                for jobid in reduce_list( jobid_list, job_running_list ):
-                                    njs.cancel_job( { 'job_id': jobid } )
-                                raise Exception( "jobs canceled because of timout")
-
-            time.sleep( self.checkwait )
-
+                                raise Exception("jobs canceled because of timeout")
+    
+                time.sleep( self.checkwait )
+        finally:
+            if is_local:
+                # TODO: make sure we stop all local sub-containers in SDK CALLBACK
+                pass
+            else:
+                jobs_to_stop = reduce_list( jobid_list, job_running_list )
+                if len(jobs_to_stop) > 0:
+                    print("Stopping all sub-jobs...")
+                    for jobid in jobs_to_stop:
+                        try:
+                            remote_ee_client.cancel_job( { 'job_id': jobid } )
+                        except:
+                            print("Error canceling job " + jobid)
 
         # at this point, NJS informed us that job is finished, must now check error status
 
@@ -199,11 +231,12 @@ class KBParallel:
         #           jobs state
 
         print( "about to invoke collect()" )
-        res = client.call_method("{0}.{1}_collect".format(input_params['module_name'], 
-                                                          input_params['method_name']), 
-                                 input_params["collect_params"], 
+        job_input_result_list = [job_input_result_map[key] for key in job_input_result_map]
+        # TODO: we should be able to send job_input_result_list to collect-method
+        res = client.call_method(module_method + "_collect", 
+                                 input_params["global_params"], 
                                  service_ver = service_ver,
-                                 context=None)        
+                                 context=None)
         pprint( res )
         # for now, return a dummy object with a string message
 
@@ -217,79 +250,7 @@ class KBParallel:
         # return the results
         return [rep]
 
-    def run_narrative(self, ctx, input_params):
-        """
-        Narrative Method Spec call helper function
-        :param input_params: instance of type "KBParallelrunInputParams"
-           (run() method) -> structure: parameter "module_name" of String,
-           parameter "method_name" of String, parameter "service_ver" of
-           String, parameter "prepare_params" of list of unspecified object,
-           parameter "collect_params" of list of unspecified object,
-           parameter "client_class_name" of String, parameter "time_limit" of
-           Long
-        :returns: instance of type "Report" (A simple Report of a method run
-           in KBase. It only provides for now a way to display a fixed width
-           text output summary message, a list of warnings, and a list of
-           objects created (each with descriptions). @optional warnings
-           file_links html_links direct_html direct_html_link_index @metadata
-           ws length(warnings) as Warnings @metadata ws length(text_message)
-           as Size(characters) @metadata ws length(objects_created) as
-           Objects Created) -> structure: parameter "text_message" of String,
-           parameter "warnings" of list of String, parameter
-           "objects_created" of list of type "WorkspaceObject" (Represents a
-           Workspace object with some brief description text that can be
-           associated with the object. @optional description) -> structure:
-           parameter "ref" of type "ws_id" (@id ws), parameter "description"
-           of String, parameter "file_links" of list of type "LinkedFile"
-           (Represents a file or html archive that the report should like to
-           @optional description) -> structure: parameter "handle" of type
-           "handle_ref" (Reference to a handle @id handle), parameter
-           "description" of String, parameter "name" of String, parameter
-           "URL" of String, parameter "html_links" of list of type
-           "LinkedFile" (Represents a file or html archive that the report
-           should like to @optional description) -> structure: parameter
-           "handle" of type "handle_ref" (Reference to a handle @id handle),
-           parameter "description" of String, parameter "name" of String,
-           parameter "URL" of String, parameter "direct_html" of String,
-           parameter "direct_html_link_index" of Long
-        """
-        # ctx is the context object
-        # return variables are: rep
-        #BEGIN run_narrative
-
-        # TODO: at the moment, one level generalization
-        target ={'prepare_params' : [{}], 'collect_params' : [{}]}
-        pprint(input_params)
-        for key in input_params:
-             path = key.split(".")
-             print "processing:" + key
-             pprint(path)
-             if len(path) < 2:
-                 raise ValueError("run() parameter must be at least two depth".format(path[0]))
-             if path[0] != "input_params":
-                 raise ValueError("{0} is not expected the first parameter path".format(path[0]))
-             if path[1] in ["prepare_params", "collect_params"]:
-                 if len(path) != 4:
-                     raise ValueError("run() prepara or collect parameter must be four depth".format(path[0]))
-                 idx = int(path[2])
-                 while idx < len(target[path[1]])-1:
-                     target[path[1]].append({})
-                 target[path[1]][idx][path[3]] = input_params[key]
-             else:
-                 target[path[1]] = input_params[key]
-        rep = self.run(ctx,target)        
-        rep = rep[0]
-
-        #END run_narrative
-
-        # At some point might do deeper type checking...
-        if not isinstance(rep, dict):
-            raise ValueError('Method run_narrative return value ' +
-                             'rep is not type dict as required.')
-        # return the results
-        return [rep]
-
-    def status(self, ctx, input_params):
+    def job_status(self, ctx, input_params):
         """
         :param input_params: instance of type "KBParallelstatusInputParams"
            (status() method) -> structure: parameter "joblist" of list of
@@ -300,13 +261,13 @@ class KBParallel:
         """
         # ctx is the context object
         # return variables are: ret
-        #BEGIN status
-        ret = notyet( "status" )
-        #END status
+        #BEGIN job_status
+        ret = notyet( "job_status" )
+        #END job_status
 
         # At some point might do deeper type checking...
         if not isinstance(ret, dict):
-            raise ValueError('Method status return value ' +
+            raise ValueError('Method job_status return value ' +
                              'ret is not type dict as required.')
         # return the results
         return [ret]
@@ -314,8 +275,8 @@ class KBParallel:
     def cancel_run(self, ctx, input_params):
         """
         :param input_params: instance of type "KBParallelcancel_runInput"
-           (cancel_run() method)
-        :returns: instance of type "KBParallelcancel_runOutput"
+           (cancel_run() method) -> structure:
+        :returns: instance of type "KBParallelcancel_runOutput" -> structure:
         """
         # ctx is the context object
         # return variables are: ret
@@ -324,17 +285,17 @@ class KBParallel:
         #END cancel_run
 
         # At some point might do deeper type checking...
-        if not isinstance(ret, basestring):
+        if not isinstance(ret, dict):
             raise ValueError('Method cancel_run return value ' +
-                             'ret is not type basestring as required.')
+                             'ret is not type dict as required.')
         # return the results
         return [ret]
 
     def getlog(self, ctx, input_params):
         """
         :param input_params: instance of type "KBParallelgetlogInput"
-           (getlog() method)
-        :returns: instance of type "KBParallelgetlogOutput"
+           (getlog() method) -> structure:
+        :returns: instance of type "KBParallelgetlogOutput" -> structure:
         """
         # ctx is the context object
         # return variables are: ret
@@ -343,8 +304,17 @@ class KBParallel:
         #END getlog
 
         # At some point might do deeper type checking...
-        if not isinstance(ret, basestring):
+        if not isinstance(ret, dict):
             raise ValueError('Method getlog return value ' +
-                             'ret is not type basestring as required.')
+                             'ret is not type dict as required.')
         # return the results
         return [ret]
+    def status(self, ctx):
+        #BEGIN_STATUS
+        returnVal = {'state': "OK",
+                     'message': "",
+                     'version': self.VERSION,
+                     'git_url': self.GIT_URL,
+                     'git_commit_hash': self.GIT_COMMIT_HASH}
+        #END_STATUS
+        return [returnVal]

@@ -15,7 +15,7 @@ import us.kbase.kbasereport.Report;
 /**
  * <p>Original spec-file type: KBParallelOutputObj</p>
  * <pre>
- * SJ: the following is not necessary
+ * msg - any additional message.
  * </pre>
  * 
  */
