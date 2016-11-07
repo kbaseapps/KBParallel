@@ -16,7 +16,19 @@ import us.kbase.common.service.UObject;
 /**
  * <p>Original spec-file type: KBParallelrunInputParams</p>
  * <pre>
- * run() method
+ * Input parameters for run() method.
+ * module_name - SDK module name (ie. ManyHellos, RNAseq),
+ * method_name - method in SDK module (TopHatcall, Hiseqcall etc each will have own _prepare(),
+ *     _runEach(), _collect() methods defined),
+ * service_ver - optional version of SDK module (may be dev/beta/release, or symantic version
+ *     or particular git commit hash), it's release by default,
+ * is_local - optional flag defining way of scheduling sub-job, in case is_local=false sub-jobs
+ *     are scheduled against remote execution engine, if is_local=true then sub_jobs are run as
+ *     local functions through CALLBACK mechanism, default value is false,
+ * global_input - input data which is supposed to be sent to 
+ *     <module_name>.<method_name>_prepare() method,
+ * max_num_jobs - maximum number of sub-jobs, equals to 5 by default,
+ * time_limit - time limit in seconds, equals to 5000 by default.
  * </pre>
  * 
  */
@@ -26,9 +38,9 @@ import us.kbase.common.service.UObject;
     "module_name",
     "method_name",
     "service_ver",
-    "prepare_params",
-    "collect_params",
-    "client_class_name",
+    "is_local",
+    "global_input",
+    "max_num_jobs",
     "time_limit"
 })
 public class KBParallelrunInputParams {
@@ -39,12 +51,12 @@ public class KBParallelrunInputParams {
     private String methodName;
     @JsonProperty("service_ver")
     private String serviceVer;
-    @JsonProperty("prepare_params")
-    private List<UObject> prepareParams;
-    @JsonProperty("collect_params")
-    private List<UObject> collectParams;
-    @JsonProperty("client_class_name")
-    private String clientClassName;
+    @JsonProperty("is_local")
+    private Long isLocal;
+    @JsonProperty("global_input")
+    private List<UObject> globalInput;
+    @JsonProperty("max_num_jobs")
+    private Long maxNumJobs;
     @JsonProperty("time_limit")
     private Long timeLimit;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -94,48 +106,48 @@ public class KBParallelrunInputParams {
         return this;
     }
 
-    @JsonProperty("prepare_params")
-    public List<UObject> getPrepareParams() {
-        return prepareParams;
+    @JsonProperty("is_local")
+    public Long getIsLocal() {
+        return isLocal;
     }
 
-    @JsonProperty("prepare_params")
-    public void setPrepareParams(List<UObject> prepareParams) {
-        this.prepareParams = prepareParams;
+    @JsonProperty("is_local")
+    public void setIsLocal(Long isLocal) {
+        this.isLocal = isLocal;
     }
 
-    public KBParallelrunInputParams withPrepareParams(List<UObject> prepareParams) {
-        this.prepareParams = prepareParams;
+    public KBParallelrunInputParams withIsLocal(Long isLocal) {
+        this.isLocal = isLocal;
         return this;
     }
 
-    @JsonProperty("collect_params")
-    public List<UObject> getCollectParams() {
-        return collectParams;
+    @JsonProperty("global_input")
+    public List<UObject> getGlobalInput() {
+        return globalInput;
     }
 
-    @JsonProperty("collect_params")
-    public void setCollectParams(List<UObject> collectParams) {
-        this.collectParams = collectParams;
+    @JsonProperty("global_input")
+    public void setGlobalInput(List<UObject> globalInput) {
+        this.globalInput = globalInput;
     }
 
-    public KBParallelrunInputParams withCollectParams(List<UObject> collectParams) {
-        this.collectParams = collectParams;
+    public KBParallelrunInputParams withGlobalInput(List<UObject> globalInput) {
+        this.globalInput = globalInput;
         return this;
     }
 
-    @JsonProperty("client_class_name")
-    public String getClientClassName() {
-        return clientClassName;
+    @JsonProperty("max_num_jobs")
+    public Long getMaxNumJobs() {
+        return maxNumJobs;
     }
 
-    @JsonProperty("client_class_name")
-    public void setClientClassName(String clientClassName) {
-        this.clientClassName = clientClassName;
+    @JsonProperty("max_num_jobs")
+    public void setMaxNumJobs(Long maxNumJobs) {
+        this.maxNumJobs = maxNumJobs;
     }
 
-    public KBParallelrunInputParams withClientClassName(String clientClassName) {
-        this.clientClassName = clientClassName;
+    public KBParallelrunInputParams withMaxNumJobs(Long maxNumJobs) {
+        this.maxNumJobs = maxNumJobs;
         return this;
     }
 
@@ -166,7 +178,7 @@ public class KBParallelrunInputParams {
 
     @Override
     public String toString() {
-        return ((((((((((((((((("KBParallelrunInputParams"+" [moduleName=")+ moduleName)+", methodName=")+ methodName)+", serviceVer=")+ serviceVer)+", prepareParams=")+ prepareParams)+", collectParams=")+ collectParams)+", clientClassName=")+ clientClassName)+", timeLimit=")+ timeLimit)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((("KBParallelrunInputParams"+" [moduleName=")+ moduleName)+", methodName=")+ methodName)+", serviceVer=")+ serviceVer)+", isLocal=")+ isLocal)+", globalInput=")+ globalInput)+", maxNumJobs=")+ maxNumJobs)+", timeLimit=")+ timeLimit)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

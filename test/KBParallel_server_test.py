@@ -96,20 +96,13 @@ class KBParallelTest(unittest.TestCase):
         input_params = { 'module_name': 'ManyHellos',
                          'method_name': 'manyHellos',
                          'service_ver': 'beta',
-                         'prepare_params': [{'num_jobs' : 3}],
-                         'collect_params': [{'num_jobs' : 3}]
+                         'is_local': 1,
+                         'global_params': [{'num_jobs' : 3, 
+                                            'msg': "Hello_",
+                                            'workspace': self.getWsName()}]
                        }
-        in_params    = { 'input_params.module_name': 'ManyHellos',
-                         'input_params.method_name': 'manyHellos',
-                         'input_params.service_ver': 'beta',
-                         'input_params.prepare_params.0.msg': "Hello_",
-                         #'input_params.prepare_params.0.workspace': "sjyoo:1440535806637",
-                         'input_params.prepare_params.0.workspace': "mccorkle:1469823748917",
-                         'input_params.prepare_params.0.num_jobs': "3",
-                         'input_params.collect_params.0.num_jobs': "3"
-                       }
-        #res= self.getImpl().run( self.getContext(), input_params )
-        res= self.getImpl().run_narrative( self.getContext(), in_params )
+        res= self.getImpl().run( self.getContext(), input_params )
+        #res= self.getImpl().run_narrative( self.getContext(), in_params )
         pprint( res )
 
         #
