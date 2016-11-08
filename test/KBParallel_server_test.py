@@ -95,11 +95,11 @@ class KBParallelTest(unittest.TestCase):
         print( "in test_KBParallel()")
         input_params = { 'module_name': 'ManyHellos',
                          'method_name': 'manyHellos',
-                         'service_ver': 'beta',
+                         'service_ver': 'dev',
                          'is_local': 1,
-                         'global_params': [{'num_jobs' : 3, 
-                                            'msg': "Hello_",
-                                            'workspace': self.getWsName()}]
+                         'global_params': {'num_jobs' : 3, 
+                                           'msg': "Hello_",
+                                           'workspace': self.getWsName()}
                        }
         res= self.getImpl().run( self.getContext(), input_params )
         #res= self.getImpl().run_narrative( self.getContext(), in_params )

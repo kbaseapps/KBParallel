@@ -167,7 +167,7 @@ sub _check_job {
 
 =head2 run
 
-  $rep = $obj->run($input_params)
+  $return = $obj->run($input_params)
 
 =over 4
 
@@ -177,34 +177,15 @@ sub _check_job {
 
 <pre>
 $input_params is a KBParallel.KBParallelrunInputParams
-$rep is a KBaseReport.Report
+$return is an UnspecifiedObject, which can hold any non-null object
 KBParallelrunInputParams is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	method_name has a value which is a string
 	service_ver has a value which is a string
 	is_local has a value which is a KBParallel.boolean
-	global_input has a value which is a reference to a list where each element is an UnspecifiedObject, which can hold any non-null object
-	max_num_jobs has a value which is an int
+	global_input has a value which is an UnspecifiedObject, which can hold any non-null object
 	time_limit has a value which is an int
 boolean is an int
-Report is a reference to a hash where the following keys are defined:
-	text_message has a value which is a string
-	warnings has a value which is a reference to a list where each element is a string
-	objects_created has a value which is a reference to a list where each element is a KBaseReport.WorkspaceObject
-	file_links has a value which is a reference to a list where each element is a KBaseReport.LinkedFile
-	html_links has a value which is a reference to a list where each element is a KBaseReport.LinkedFile
-	direct_html has a value which is a string
-	direct_html_link_index has a value which is an int
-WorkspaceObject is a reference to a hash where the following keys are defined:
-	ref has a value which is a KBaseReport.ws_id
-	description has a value which is a string
-ws_id is a string
-LinkedFile is a reference to a hash where the following keys are defined:
-	handle has a value which is a KBaseReport.handle_ref
-	description has a value which is a string
-	name has a value which is a string
-	URL has a value which is a string
-handle_ref is a string
 
 </pre>
 
@@ -213,34 +194,15 @@ handle_ref is a string
 =begin text
 
 $input_params is a KBParallel.KBParallelrunInputParams
-$rep is a KBaseReport.Report
+$return is an UnspecifiedObject, which can hold any non-null object
 KBParallelrunInputParams is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	method_name has a value which is a string
 	service_ver has a value which is a string
 	is_local has a value which is a KBParallel.boolean
-	global_input has a value which is a reference to a list where each element is an UnspecifiedObject, which can hold any non-null object
-	max_num_jobs has a value which is an int
+	global_input has a value which is an UnspecifiedObject, which can hold any non-null object
 	time_limit has a value which is an int
 boolean is an int
-Report is a reference to a hash where the following keys are defined:
-	text_message has a value which is a string
-	warnings has a value which is a reference to a list where each element is a string
-	objects_created has a value which is a reference to a list where each element is a KBaseReport.WorkspaceObject
-	file_links has a value which is a reference to a list where each element is a KBaseReport.LinkedFile
-	html_links has a value which is a reference to a list where each element is a KBaseReport.LinkedFile
-	direct_html has a value which is a string
-	direct_html_link_index has a value which is an int
-WorkspaceObject is a reference to a hash where the following keys are defined:
-	ref has a value which is a KBaseReport.ws_id
-	description has a value which is a string
-ws_id is a string
-LinkedFile is a reference to a hash where the following keys are defined:
-	handle has a value which is a KBaseReport.handle_ref
-	description has a value which is a string
-	name has a value which is a string
-	URL has a value which is a string
-handle_ref is a string
 
 
 =end text
@@ -719,9 +681,8 @@ service_ver - optional version of SDK module (may be dev/beta/release, or symant
 is_local - optional flag defining way of scheduling sub-job, in case is_local=false sub-jobs
     are scheduled against remote execution engine, if is_local=true then sub_jobs are run as
     local functions through CALLBACK mechanism, default value is false,
-global_input - input data which is supposed to be sent to 
+global_input - input data which is supposed to be sent as a part to 
     <module_name>.<method_name>_prepare() method,
-max_num_jobs - maximum number of sub-jobs, equals to 5 by default,
 time_limit - time limit in seconds, equals to 5000 by default.
 
 
@@ -735,8 +696,7 @@ module_name has a value which is a string
 method_name has a value which is a string
 service_ver has a value which is a string
 is_local has a value which is a KBParallel.boolean
-global_input has a value which is a reference to a list where each element is an UnspecifiedObject, which can hold any non-null object
-max_num_jobs has a value which is an int
+global_input has a value which is an UnspecifiedObject, which can hold any non-null object
 time_limit has a value which is an int
 
 </pre>
@@ -750,46 +710,8 @@ module_name has a value which is a string
 method_name has a value which is a string
 service_ver has a value which is a string
 is_local has a value which is a KBParallel.boolean
-global_input has a value which is a reference to a list where each element is an UnspecifiedObject, which can hold any non-null object
-max_num_jobs has a value which is an int
+global_input has a value which is an UnspecifiedObject, which can hold any non-null object
 time_limit has a value which is an int
-
-
-=end text
-
-=back
-
-
-
-=head2 KBParallelOutputObj
-
-=over 4
-
-
-
-=item Description
-
-msg - any additional message.
-
-
-=item Definition
-
-=begin html
-
-<pre>
-a reference to a hash where the following keys are defined:
-report has a value which is a KBaseReport.Report
-msg has a value which is a string
-
-</pre>
-
-=end html
-
-=begin text
-
-a reference to a hash where the following keys are defined:
-report has a value which is a KBaseReport.Report
-msg has a value which is a string
 
 
 =end text

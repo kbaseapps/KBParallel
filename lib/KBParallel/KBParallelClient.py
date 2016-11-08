@@ -61,40 +61,15 @@ class KBParallel(object):
            case is_local=false sub-jobs are scheduled against remote
            execution engine, if is_local=true then sub_jobs are run as local
            functions through CALLBACK mechanism, default value is false,
-           global_input - input data which is supposed to be sent to
-           <module_name>.<method_name>_prepare() method, max_num_jobs -
-           maximum number of sub-jobs, equals to 5 by default, time_limit -
-           time limit in seconds, equals to 5000 by default.) -> structure:
+           global_input - input data which is supposed to be sent as a part
+           to <module_name>.<method_name>_prepare() method, time_limit - time
+           limit in seconds, equals to 5000 by default.) -> structure:
            parameter "module_name" of String, parameter "method_name" of
            String, parameter "service_ver" of String, parameter "is_local" of
            type "boolean" (A boolean - 0 for false, 1 for true. @range (0,
-           1)), parameter "global_input" of list of unspecified object,
-           parameter "max_num_jobs" of Long, parameter "time_limit" of Long
-        :returns: instance of type "Report" (A simple Report of a method run
-           in KBase. It only provides for now a way to display a fixed width
-           text output summary message, a list of warnings, and a list of
-           objects created (each with descriptions). @optional warnings
-           file_links html_links direct_html direct_html_link_index @metadata
-           ws length(warnings) as Warnings @metadata ws length(text_message)
-           as Size(characters) @metadata ws length(objects_created) as
-           Objects Created) -> structure: parameter "text_message" of String,
-           parameter "warnings" of list of String, parameter
-           "objects_created" of list of type "WorkspaceObject" (Represents a
-           Workspace object with some brief description text that can be
-           associated with the object. @optional description) -> structure:
-           parameter "ref" of type "ws_id" (@id ws), parameter "description"
-           of String, parameter "file_links" of list of type "LinkedFile"
-           (Represents a file or html archive that the report should like to
-           @optional description) -> structure: parameter "handle" of type
-           "handle_ref" (Reference to a handle @id handle), parameter
-           "description" of String, parameter "name" of String, parameter
-           "URL" of String, parameter "html_links" of list of type
-           "LinkedFile" (Represents a file or html archive that the report
-           should like to @optional description) -> structure: parameter
-           "handle" of type "handle_ref" (Reference to a handle @id handle),
-           parameter "description" of String, parameter "name" of String,
-           parameter "URL" of String, parameter "direct_html" of String,
-           parameter "direct_html_link_index" of Long
+           1)), parameter "global_input" of unspecified object, parameter
+           "time_limit" of Long
+        :returns: instance of unspecified object
         """
         job_id = self._run_submit(input_params, context)
         async_job_check_time = self._client.async_job_check_time

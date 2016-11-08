@@ -43,8 +43,8 @@ class KBParallel:
     # the latter method is running.
     ######################################### noqa
     VERSION = "0.0.7"
-    GIT_URL = "https://github.com/sean-mccorkle/KBparallel"
-    GIT_COMMIT_HASH = "f6f87a2564155925d2cf8c2b072bc210c4c7a6c5"
+    GIT_URL = "https://github.com/rsutormin/KBparallel"
+    GIT_COMMIT_HASH = "947cad8aa1d83f8f2e8c9d5ea5ca289443ce6148"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -78,43 +78,18 @@ class KBParallel:
            case is_local=false sub-jobs are scheduled against remote
            execution engine, if is_local=true then sub_jobs are run as local
            functions through CALLBACK mechanism, default value is false,
-           global_input - input data which is supposed to be sent to
-           <module_name>.<method_name>_prepare() method, max_num_jobs -
-           maximum number of sub-jobs, equals to 5 by default, time_limit -
-           time limit in seconds, equals to 5000 by default.) -> structure:
+           global_input - input data which is supposed to be sent as a part
+           to <module_name>.<method_name>_prepare() method, time_limit - time
+           limit in seconds, equals to 5000 by default.) -> structure:
            parameter "module_name" of String, parameter "method_name" of
            String, parameter "service_ver" of String, parameter "is_local" of
            type "boolean" (A boolean - 0 for false, 1 for true. @range (0,
-           1)), parameter "global_input" of list of unspecified object,
-           parameter "max_num_jobs" of Long, parameter "time_limit" of Long
-        :returns: instance of type "Report" (A simple Report of a method run
-           in KBase. It only provides for now a way to display a fixed width
-           text output summary message, a list of warnings, and a list of
-           objects created (each with descriptions). @optional warnings
-           file_links html_links direct_html direct_html_link_index @metadata
-           ws length(warnings) as Warnings @metadata ws length(text_message)
-           as Size(characters) @metadata ws length(objects_created) as
-           Objects Created) -> structure: parameter "text_message" of String,
-           parameter "warnings" of list of String, parameter
-           "objects_created" of list of type "WorkspaceObject" (Represents a
-           Workspace object with some brief description text that can be
-           associated with the object. @optional description) -> structure:
-           parameter "ref" of type "ws_id" (@id ws), parameter "description"
-           of String, parameter "file_links" of list of type "LinkedFile"
-           (Represents a file or html archive that the report should like to
-           @optional description) -> structure: parameter "handle" of type
-           "handle_ref" (Reference to a handle @id handle), parameter
-           "description" of String, parameter "name" of String, parameter
-           "URL" of String, parameter "html_links" of list of type
-           "LinkedFile" (Represents a file or html archive that the report
-           should like to @optional description) -> structure: parameter
-           "handle" of type "handle_ref" (Reference to a handle @id handle),
-           parameter "description" of String, parameter "name" of String,
-           parameter "URL" of String, parameter "direct_html" of String,
-           parameter "direct_html_link_index" of Long
+           1)), parameter "global_input" of unspecified object, parameter
+           "time_limit" of Long
+        :returns: instance of unspecified object
         """
         # ctx is the context object
-        # return variables are: rep
+        # return variables are: returnVal
         #BEGIN run
         print( "Hi this is KBParallel.run() input_params are")
         pprint( input_params )
@@ -123,7 +98,7 @@ class KBParallel:
         module_name = input_params['module_name']
         method_name = input_params['method_name']
         module_method = module_name + '.' + method_name
-        service_ver = "beta"
+        service_ver = "release"
         if 'service_ver' in input_params and input_params['service_ver'] is not None: 
             service_ver = input_params['service_ver'] 
 
@@ -135,12 +110,17 @@ class KBParallel:
 
         # issue prepare call
         print( "about to invoke prepare()")
-        tasks_ret = client.call_method(module_method + "_prepare",
-                                       input_params["global_params"], 
-                                       service_ver = service_ver,
-                                       context=None)
+        prepare_input_params = {'global_input_params': input_params["global_params"], 
+                                'global_method': {'module_name': module_name,
+                                                  'method_name': method_name,
+                                                  'service_ver': service_ver}}
+        schedule = client.call_method(module_method + "_prepare",
+                                      [prepare_input_params], 
+                                      service_ver = service_ver,
+                                      context=None)
         print( "back in run")
-        tasks = tasks_ret        # Question: why do we need tasks_ret at all?
+        tasks = schedule['tasks']
+        collect_method = schedule.get('collect_method', None)
         pprint( tasks )
 
         # initiate NJS wrapper
@@ -162,17 +142,26 @@ class KBParallel:
         job_input_result_map = {}
         for task in tasks:
             pprint( ["   launching task", task]  )
-            #r1 = mh.manyHellos_runEach( ctx, task )
-            #pprint( r1 )
+            task_method_module_name = None
+            task_service_ver = None
+            if 'method' in task:
+                task_method = task['method']
+                task_method_module_name = (task_method['module_name'] + '.' + 
+                                           task_method['method_name'])
+                task_service_ver = task_method.get('service_ver', None)
+            else:
+                task_method_module_name = module_method + "_runEach"
+                task_service_ver = service_ver
+            task_input = task['input_arguments']
             
-            jobid = exec_engine_client._submit_job(module_method + "_runEach",
-                                                   [task], 
-                                                   service_ver=service_ver)
+            jobid = exec_engine_client._submit_job(task_method_module_name,
+                                                   task_input, 
+                                                   service_ver=task_service_ver)
             print( "job_id", jobid )
             jobid_list.append( jobid )
             job_running_list.append( True )
             job_timeout_list.append( None )
-            job_input_result_map[jobid] = {"input": [task]}
+            job_input_result_map[jobid] = {"input": task_input}
             njobs = njobs + 1
 
         # Polling loop to see when job is finished
@@ -198,7 +187,10 @@ class KBParallel:
                                 print( "************** job ", j, " has crashed*********" )
                                 raise Exception("jobs canceled because of failure")
                             elif 'result' in job_state_desc:
-                                job_input_result_map[jobid_list[j]]['output'] = job_state_desc['result']
+                                job_result = job_state_desc['result']
+                                if len(job_result) == 1:
+                                    job_result = job_result[0]
+                                job_input_result_map[jobid_list[j]]['output'] = job_result
                             else:
                                 raise Exception("Unexpected job state (no error/result fields")
                         else:                                                            # if its running, check for timeout
@@ -231,24 +223,31 @@ class KBParallel:
         #           jobs state
 
         print( "about to invoke collect()" )
-        job_input_result_list = [job_input_result_map[key] for key in job_input_result_map]
-        # TODO: we should be able to send job_input_result_list to collect-method
-        res = client.call_method(module_method + "_collect", 
-                                 input_params["global_params"], 
-                                 service_ver = service_ver,
+        input_result_pairs = [job_input_result_map[key] for key in job_input_result_map]
+        collect_input_params = {'global_params': input_params["global_params"],
+                                'input_result_pairs': input_result_pairs}
+        collect_module_method_name = None
+        collect_service_ver = None
+        if collect_method:
+            collect_module_method_name = (collect_method['module_name'] + '.' + 
+                                          collect_method['method_name'])
+            collect_service_ver = collect_method['service_ver']
+        else:
+            collect_module_method_name = module_method + "_collect"
+            collect_service_ver = service_ver
+        returnVal = client.call_method(collect_module_method_name,
+                                 [collect_input_params], 
+                                 service_ver = collect_service_ver,
                                  context=None)
-        pprint( res )
-        # for now, return a dummy object with a string message
-
-        rep = { 'msg': "default KBparallel.run() return value" }
+        pprint( returnVal )
         #END run
 
         # At some point might do deeper type checking...
-        if not isinstance(rep, dict):
+        if not isinstance(returnVal, object):
             raise ValueError('Method run return value ' +
-                             'rep is not type dict as required.')
+                             'returnVal is not type object as required.')
         # return the results
-        return [rep]
+        return [returnVal]
 
     def job_status(self, ctx, input_params):
         """

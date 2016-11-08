@@ -22,9 +22,8 @@ module KBParallel {
         is_local - optional flag defining way of scheduling sub-job, in case is_local=false sub-jobs
             are scheduled against remote execution engine, if is_local=true then sub_jobs are run as
             local functions through CALLBACK mechanism, default value is false,
-        global_input - input data which is supposed to be sent to 
+        global_input - input data which is supposed to be sent as a part to 
             <module_name>.<method_name>_prepare() method,
-        max_num_jobs - maximum number of sub-jobs, equals to 5 by default,
         time_limit - time limit in seconds, equals to 5000 by default.
     */
     typedef structure {
@@ -32,21 +31,12 @@ module KBParallel {
         string method_name;
         string service_ver;
         boolean is_local;
-        list<UnspecifiedObject> global_input;
-        int max_num_jobs;
+        UnspecifiedObject global_input;
         int time_limit;
     } KBParallelrunInputParams;
 
-    /*
-        msg - any additional message.
-    */
-    typedef structure {
-        KBaseReport.Report report;
-        string msg;
-    } KBParallelOutputObj;
-
-    async funcdef run( KBParallelrunInputParams input_params ) 
-        returns (KBaseReport.Report rep) authentication required;
+    async funcdef run(KBParallelrunInputParams input_params)
+        returns (UnspecifiedObject) authentication required;
 
     /*
         status() method
@@ -61,7 +51,7 @@ module KBParallel {
         list<string> jobstatus;
     } KBParallelstatusOutputObj;
 
-    funcdef job_status( KBParallelstatusInputParams input_params ) returns( KBParallelstatusOutputObj ret ) authentication required;
+    funcdef job_status(KBParallelstatusInputParams input_params) returns(KBParallelstatusOutputObj ret) authentication required;
 
     /*
         cancel_run() method
@@ -73,7 +63,7 @@ module KBParallel {
     typedef structure {
     } KBParallelcancel_runOutput;
 
-    funcdef cancel_run( KBParallelcancel_runInput input_params ) returns( KBParallelcancel_runOutput ret ) authentication required;
+    funcdef cancel_run(KBParallelcancel_runInput input_params) returns(KBParallelcancel_runOutput ret) authentication required;
 
     /*
         getlog() method
@@ -81,6 +71,7 @@ module KBParallel {
 
     typedef structure {
     } KBParallelgetlogInput;
+    
     typedef structure {
     } KBParallelgetlogOutput;
 

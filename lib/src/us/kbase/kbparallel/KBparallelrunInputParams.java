@@ -2,7 +2,6 @@
 package us.kbase.kbparallel;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javax.annotation.Generated;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -25,9 +24,8 @@ import us.kbase.common.service.UObject;
  * is_local - optional flag defining way of scheduling sub-job, in case is_local=false sub-jobs
  *     are scheduled against remote execution engine, if is_local=true then sub_jobs are run as
  *     local functions through CALLBACK mechanism, default value is false,
- * global_input - input data which is supposed to be sent to 
+ * global_input - input data which is supposed to be sent as a part to 
  *     <module_name>.<method_name>_prepare() method,
- * max_num_jobs - maximum number of sub-jobs, equals to 5 by default,
  * time_limit - time limit in seconds, equals to 5000 by default.
  * </pre>
  * 
@@ -40,7 +38,6 @@ import us.kbase.common.service.UObject;
     "service_ver",
     "is_local",
     "global_input",
-    "max_num_jobs",
     "time_limit"
 })
 public class KBParallelrunInputParams {
@@ -54,9 +51,7 @@ public class KBParallelrunInputParams {
     @JsonProperty("is_local")
     private Long isLocal;
     @JsonProperty("global_input")
-    private List<UObject> globalInput;
-    @JsonProperty("max_num_jobs")
-    private Long maxNumJobs;
+    private UObject globalInput;
     @JsonProperty("time_limit")
     private Long timeLimit;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -122,32 +117,17 @@ public class KBParallelrunInputParams {
     }
 
     @JsonProperty("global_input")
-    public List<UObject> getGlobalInput() {
+    public UObject getGlobalInput() {
         return globalInput;
     }
 
     @JsonProperty("global_input")
-    public void setGlobalInput(List<UObject> globalInput) {
+    public void setGlobalInput(UObject globalInput) {
         this.globalInput = globalInput;
     }
 
-    public KBParallelrunInputParams withGlobalInput(List<UObject> globalInput) {
+    public KBParallelrunInputParams withGlobalInput(UObject globalInput) {
         this.globalInput = globalInput;
-        return this;
-    }
-
-    @JsonProperty("max_num_jobs")
-    public Long getMaxNumJobs() {
-        return maxNumJobs;
-    }
-
-    @JsonProperty("max_num_jobs")
-    public void setMaxNumJobs(Long maxNumJobs) {
-        this.maxNumJobs = maxNumJobs;
-    }
-
-    public KBParallelrunInputParams withMaxNumJobs(Long maxNumJobs) {
-        this.maxNumJobs = maxNumJobs;
         return this;
     }
 
@@ -178,7 +158,7 @@ public class KBParallelrunInputParams {
 
     @Override
     public String toString() {
-        return ((((((((((((((((("KBParallelrunInputParams"+" [moduleName=")+ moduleName)+", methodName=")+ methodName)+", serviceVer=")+ serviceVer)+", isLocal=")+ isLocal)+", globalInput=")+ globalInput)+", maxNumJobs=")+ maxNumJobs)+", timeLimit=")+ timeLimit)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((("KBParallelrunInputParams"+" [moduleName=")+ moduleName)+", methodName=")+ methodName)+", serviceVer=")+ serviceVer)+", isLocal=")+ isLocal)+", globalInput=")+ globalInput)+", timeLimit=")+ timeLimit)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }
