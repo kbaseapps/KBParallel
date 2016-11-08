@@ -179,12 +179,15 @@ sub _check_job {
 $input_params is a KBParallel.KBParallelrunInputParams
 $return is an UnspecifiedObject, which can hold any non-null object
 KBParallelrunInputParams is a reference to a hash where the following keys are defined:
-	module_name has a value which is a string
-	method_name has a value which is a string
-	service_ver has a value which is a string
+	method has a value which is a KBParallel.FullMethodQualifier
+	prepare_method has a value which is a KBParallel.FullMethodQualifier
 	is_local has a value which is a KBParallel.boolean
 	global_input has a value which is an UnspecifiedObject, which can hold any non-null object
 	time_limit has a value which is an int
+FullMethodQualifier is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	method_name has a value which is a string
+	service_ver has a value which is a string
 boolean is an int
 
 </pre>
@@ -196,12 +199,15 @@ boolean is an int
 $input_params is a KBParallel.KBParallelrunInputParams
 $return is an UnspecifiedObject, which can hold any non-null object
 KBParallelrunInputParams is a reference to a hash where the following keys are defined:
-	module_name has a value which is a string
-	method_name has a value which is a string
-	service_ver has a value which is a string
+	method has a value which is a KBParallel.FullMethodQualifier
+	prepare_method has a value which is a KBParallel.FullMethodQualifier
 	is_local has a value which is a KBParallel.boolean
 	global_input has a value which is an UnspecifiedObject, which can hold any non-null object
 	time_limit has a value which is an int
+FullMethodQualifier is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	method_name has a value which is a string
+	service_ver has a value which is a string
 boolean is an int
 
 
@@ -663,6 +669,49 @@ an int
 
 
 
+=head2 FullMethodQualifier
+
+=over 4
+
+
+
+=item Description
+
+module_name - SDK module name (ie. ManyHellos, RNAseq),
+method_name - method in SDK module (TopHatcall, Hiseqcall etc each will have own _prepare(),
+    _runEach(), _collect() methods defined),
+service_ver - optional version of SDK module (may be dev/beta/release, or symantic version
+    or particular git commit hash), it's release by default,
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+method_name has a value which is a string
+service_ver has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+method_name has a value which is a string
+service_ver has a value which is a string
+
+
+=end text
+
+=back
+
+
+
 =head2 KBParallelrunInputParams
 
 =over 4
@@ -673,11 +722,8 @@ an int
 
 Input parameters for run() method.
 
-module_name - SDK module name (ie. ManyHellos, RNAseq),
-method_name - method in SDK module (TopHatcall, Hiseqcall etc each will have own _prepare(),
-    _runEach(), _collect() methods defined),
-service_ver - optional version of SDK module (may be dev/beta/release, or symantic version
-    or particular git commit hash), it's release by default,
+method - optional method where _prepare(), _runEach() and _collect() suffixes are applied,
+prepare_method - optional method (if defined overrides _prepare suffix rule),
 is_local - optional flag defining way of scheduling sub-job, in case is_local=false sub-jobs
     are scheduled against remote execution engine, if is_local=true then sub_jobs are run as
     local functions through CALLBACK mechanism, default value is false,
@@ -692,9 +738,8 @@ time_limit - time limit in seconds, equals to 5000 by default.
 
 <pre>
 a reference to a hash where the following keys are defined:
-module_name has a value which is a string
-method_name has a value which is a string
-service_ver has a value which is a string
+method has a value which is a KBParallel.FullMethodQualifier
+prepare_method has a value which is a KBParallel.FullMethodQualifier
 is_local has a value which is a KBParallel.boolean
 global_input has a value which is an UnspecifiedObject, which can hold any non-null object
 time_limit has a value which is an int
@@ -706,9 +751,8 @@ time_limit has a value which is an int
 =begin text
 
 a reference to a hash where the following keys are defined:
-module_name has a value which is a string
-method_name has a value which is a string
-service_ver has a value which is a string
+method has a value which is a KBParallel.FullMethodQualifier
+prepare_method has a value which is a KBParallel.FullMethodQualifier
 is_local has a value which is a KBParallel.boolean
 global_input has a value which is an UnspecifiedObject, which can hold any non-null object
 time_limit has a value which is an int

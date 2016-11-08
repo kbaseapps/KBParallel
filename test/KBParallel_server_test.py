@@ -93,9 +93,9 @@ class KBParallelTest(unittest.TestCase):
         # ret = self.getImpl().your_method(self.getContext(), parameters...)
         #ret = self.getImpl().manyHellos( self.getContext(), input_params )
         print( "in test_KBParallel()")
-        input_params = { 'module_name': 'ManyHellos',
-                         'method_name': 'manyHellos',
-                         'service_ver': 'dev',
+        input_params = { 'method': {'module_name': 'ManyHellos',
+                                    'method_name': 'manyHellos',
+                                    'service_ver': 'dev'},
                          'is_local': 1,
                          'global_params': {'num_jobs' : 3, 
                                            'msg': "Hello_",

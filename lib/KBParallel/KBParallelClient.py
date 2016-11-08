@@ -51,23 +51,35 @@ class KBParallel(object):
     def run(self, input_params, context=None):
         """
         :param input_params: instance of type "KBParallelrunInputParams"
-           (Input parameters for run() method. module_name - SDK module name
-           (ie. ManyHellos, RNAseq), method_name - method in SDK module
-           (TopHatcall, Hiseqcall etc each will have own _prepare(),
-           _runEach(), _collect() methods defined), service_ver - optional
-           version of SDK module (may be dev/beta/release, or symantic
-           version or particular git commit hash), it's release by default,
-           is_local - optional flag defining way of scheduling sub-job, in
-           case is_local=false sub-jobs are scheduled against remote
-           execution engine, if is_local=true then sub_jobs are run as local
-           functions through CALLBACK mechanism, default value is false,
-           global_input - input data which is supposed to be sent as a part
-           to <module_name>.<method_name>_prepare() method, time_limit - time
-           limit in seconds, equals to 5000 by default.) -> structure:
-           parameter "module_name" of String, parameter "method_name" of
-           String, parameter "service_ver" of String, parameter "is_local" of
-           type "boolean" (A boolean - 0 for false, 1 for true. @range (0,
-           1)), parameter "global_input" of unspecified object, parameter
+           (Input parameters for run() method. method - optional method where
+           _prepare(), _runEach() and _collect() suffixes are applied,
+           prepare_method - optional method (if defined overrides _prepare
+           suffix rule), is_local - optional flag defining way of scheduling
+           sub-job, in case is_local=false sub-jobs are scheduled against
+           remote execution engine, if is_local=true then sub_jobs are run as
+           local functions through CALLBACK mechanism, default value is
+           false, global_input - input data which is supposed to be sent as a
+           part to <module_name>.<method_name>_prepare() method, time_limit -
+           time limit in seconds, equals to 5000 by default.) -> structure:
+           parameter "method" of type "FullMethodQualifier" (module_name -
+           SDK module name (ie. ManyHellos, RNAseq), method_name - method in
+           SDK module (TopHatcall, Hiseqcall etc each will have own
+           _prepare(), _runEach(), _collect() methods defined), service_ver -
+           optional version of SDK module (may be dev/beta/release, or
+           symantic version or particular git commit hash), it's release by
+           default,) -> structure: parameter "module_name" of String,
+           parameter "method_name" of String, parameter "service_ver" of
+           String, parameter "prepare_method" of type "FullMethodQualifier"
+           (module_name - SDK module name (ie. ManyHellos, RNAseq),
+           method_name - method in SDK module (TopHatcall, Hiseqcall etc each
+           will have own _prepare(), _runEach(), _collect() methods defined),
+           service_ver - optional version of SDK module (may be
+           dev/beta/release, or symantic version or particular git commit
+           hash), it's release by default,) -> structure: parameter
+           "module_name" of String, parameter "method_name" of String,
+           parameter "service_ver" of String, parameter "is_local" of type
+           "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1)),
+           parameter "global_input" of unspecified object, parameter
            "time_limit" of Long
         :returns: instance of unspecified object
         """
