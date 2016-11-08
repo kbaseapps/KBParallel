@@ -12,13 +12,23 @@ module KBParallel {
     typedef int boolean;
 
     /*
-        Input parameters for run() method.
-        
         module_name - SDK module name (ie. ManyHellos, RNAseq),
         method_name - method in SDK module (TopHatcall, Hiseqcall etc each will have own _prepare(),
             _runEach(), _collect() methods defined),
         service_ver - optional version of SDK module (may be dev/beta/release, or symantic version
             or particular git commit hash), it's release by default,
+    */
+    typedef structure {
+        string module_name;
+        string method_name;
+        string service_ver;
+    } FullMethodQualifier;
+
+    /*
+        Input parameters for run() method.
+
+        method - optional method where _prepare(), _runEach() and _collect() suffixes are applied,
+        prepare_method - optional method (if defined overrides _prepare suffix rule),
         is_local - optional flag defining way of scheduling sub-job, in case is_local=false sub-jobs
             are scheduled against remote execution engine, if is_local=true then sub_jobs are run as
             local functions through CALLBACK mechanism, default value is false,
@@ -27,9 +37,8 @@ module KBParallel {
         time_limit - time limit in seconds, equals to 5000 by default.
     */
     typedef structure {
-        string module_name;
-        string method_name;
-        string service_ver;
+        FullMethodQualifier method;
+        FullMethodQualifier prepare_method;
         boolean is_local;
         UnspecifiedObject global_input;
         int time_limit;

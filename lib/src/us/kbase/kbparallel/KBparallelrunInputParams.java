@@ -16,11 +16,8 @@ import us.kbase.common.service.UObject;
  * <p>Original spec-file type: KBParallelrunInputParams</p>
  * <pre>
  * Input parameters for run() method.
- * module_name - SDK module name (ie. ManyHellos, RNAseq),
- * method_name - method in SDK module (TopHatcall, Hiseqcall etc each will have own _prepare(),
- *     _runEach(), _collect() methods defined),
- * service_ver - optional version of SDK module (may be dev/beta/release, or symantic version
- *     or particular git commit hash), it's release by default,
+ * method - optional method where _prepare(), _runEach() and _collect() suffixes are applied,
+ * prepare_method - optional method (if defined overrides _prepare suffix rule),
  * is_local - optional flag defining way of scheduling sub-job, in case is_local=false sub-jobs
  *     are scheduled against remote execution engine, if is_local=true then sub_jobs are run as
  *     local functions through CALLBACK mechanism, default value is false,
@@ -33,21 +30,40 @@ import us.kbase.common.service.UObject;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
-    "module_name",
-    "method_name",
-    "service_ver",
+    "method",
+    "prepare_method",
     "is_local",
     "global_input",
     "time_limit"
 })
 public class KBParallelrunInputParams {
 
-    @JsonProperty("module_name")
-    private String moduleName;
-    @JsonProperty("method_name")
-    private String methodName;
-    @JsonProperty("service_ver")
-    private String serviceVer;
+    /**
+     * <p>Original spec-file type: FullMethodQualifier</p>
+     * <pre>
+     * module_name - SDK module name (ie. ManyHellos, RNAseq),
+     * method_name - method in SDK module (TopHatcall, Hiseqcall etc each will have own _prepare(),
+     *     _runEach(), _collect() methods defined),
+     * service_ver - optional version of SDK module (may be dev/beta/release, or symantic version
+     *     or particular git commit hash), it's release by default,
+     * </pre>
+     * 
+     */
+    @JsonProperty("method")
+    private FullMethodQualifier method;
+    /**
+     * <p>Original spec-file type: FullMethodQualifier</p>
+     * <pre>
+     * module_name - SDK module name (ie. ManyHellos, RNAseq),
+     * method_name - method in SDK module (TopHatcall, Hiseqcall etc each will have own _prepare(),
+     *     _runEach(), _collect() methods defined),
+     * service_ver - optional version of SDK module (may be dev/beta/release, or symantic version
+     *     or particular git commit hash), it's release by default,
+     * </pre>
+     * 
+     */
+    @JsonProperty("prepare_method")
+    private FullMethodQualifier prepareMethod;
     @JsonProperty("is_local")
     private Long isLocal;
     @JsonProperty("global_input")
@@ -56,48 +72,77 @@ public class KBParallelrunInputParams {
     private Long timeLimit;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-    @JsonProperty("module_name")
-    public String getModuleName() {
-        return moduleName;
+    /**
+     * <p>Original spec-file type: FullMethodQualifier</p>
+     * <pre>
+     * module_name - SDK module name (ie. ManyHellos, RNAseq),
+     * method_name - method in SDK module (TopHatcall, Hiseqcall etc each will have own _prepare(),
+     *     _runEach(), _collect() methods defined),
+     * service_ver - optional version of SDK module (may be dev/beta/release, or symantic version
+     *     or particular git commit hash), it's release by default,
+     * </pre>
+     * 
+     */
+    @JsonProperty("method")
+    public FullMethodQualifier getMethod() {
+        return method;
     }
 
-    @JsonProperty("module_name")
-    public void setModuleName(String moduleName) {
-        this.moduleName = moduleName;
+    /**
+     * <p>Original spec-file type: FullMethodQualifier</p>
+     * <pre>
+     * module_name - SDK module name (ie. ManyHellos, RNAseq),
+     * method_name - method in SDK module (TopHatcall, Hiseqcall etc each will have own _prepare(),
+     *     _runEach(), _collect() methods defined),
+     * service_ver - optional version of SDK module (may be dev/beta/release, or symantic version
+     *     or particular git commit hash), it's release by default,
+     * </pre>
+     * 
+     */
+    @JsonProperty("method")
+    public void setMethod(FullMethodQualifier method) {
+        this.method = method;
     }
 
-    public KBParallelrunInputParams withModuleName(String moduleName) {
-        this.moduleName = moduleName;
+    public KBParallelrunInputParams withMethod(FullMethodQualifier method) {
+        this.method = method;
         return this;
     }
 
-    @JsonProperty("method_name")
-    public String getMethodName() {
-        return methodName;
+    /**
+     * <p>Original spec-file type: FullMethodQualifier</p>
+     * <pre>
+     * module_name - SDK module name (ie. ManyHellos, RNAseq),
+     * method_name - method in SDK module (TopHatcall, Hiseqcall etc each will have own _prepare(),
+     *     _runEach(), _collect() methods defined),
+     * service_ver - optional version of SDK module (may be dev/beta/release, or symantic version
+     *     or particular git commit hash), it's release by default,
+     * </pre>
+     * 
+     */
+    @JsonProperty("prepare_method")
+    public FullMethodQualifier getPrepareMethod() {
+        return prepareMethod;
     }
 
-    @JsonProperty("method_name")
-    public void setMethodName(String methodName) {
-        this.methodName = methodName;
+    /**
+     * <p>Original spec-file type: FullMethodQualifier</p>
+     * <pre>
+     * module_name - SDK module name (ie. ManyHellos, RNAseq),
+     * method_name - method in SDK module (TopHatcall, Hiseqcall etc each will have own _prepare(),
+     *     _runEach(), _collect() methods defined),
+     * service_ver - optional version of SDK module (may be dev/beta/release, or symantic version
+     *     or particular git commit hash), it's release by default,
+     * </pre>
+     * 
+     */
+    @JsonProperty("prepare_method")
+    public void setPrepareMethod(FullMethodQualifier prepareMethod) {
+        this.prepareMethod = prepareMethod;
     }
 
-    public KBParallelrunInputParams withMethodName(String methodName) {
-        this.methodName = methodName;
-        return this;
-    }
-
-    @JsonProperty("service_ver")
-    public String getServiceVer() {
-        return serviceVer;
-    }
-
-    @JsonProperty("service_ver")
-    public void setServiceVer(String serviceVer) {
-        this.serviceVer = serviceVer;
-    }
-
-    public KBParallelrunInputParams withServiceVer(String serviceVer) {
-        this.serviceVer = serviceVer;
+    public KBParallelrunInputParams withPrepareMethod(FullMethodQualifier prepareMethod) {
+        this.prepareMethod = prepareMethod;
         return this;
     }
 
@@ -158,7 +203,7 @@ public class KBParallelrunInputParams {
 
     @Override
     public String toString() {
-        return ((((((((((((((("KBParallelrunInputParams"+" [moduleName=")+ moduleName)+", methodName=")+ methodName)+", serviceVer=")+ serviceVer)+", isLocal=")+ isLocal)+", globalInput=")+ globalInput)+", timeLimit=")+ timeLimit)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((("KBParallelrunInputParams"+" [method=")+ method)+", prepareMethod=")+ prepareMethod)+", isLocal=")+ isLocal)+", globalInput=")+ globalInput)+", timeLimit=")+ timeLimit)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

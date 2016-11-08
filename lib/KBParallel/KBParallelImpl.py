@@ -45,7 +45,7 @@ class KBParallel:
     ######################################### noqa
     VERSION = "0.0.7"
     GIT_URL = "https://github.com/rsutormin/KBparallel"
-    GIT_COMMIT_HASH = "947cad8aa1d83f8f2e8c9d5ea5ca289443ce6148"
+    GIT_COMMIT_HASH = "bb5314130d0ceaaddff9b835f02939e5b43a5405"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -69,23 +69,35 @@ class KBParallel:
     def run(self, ctx, input_params):
         """
         :param input_params: instance of type "KBParallelrunInputParams"
-           (Input parameters for run() method. module_name - SDK module name
-           (ie. ManyHellos, RNAseq), method_name - method in SDK module
-           (TopHatcall, Hiseqcall etc each will have own _prepare(),
-           _runEach(), _collect() methods defined), service_ver - optional
-           version of SDK module (may be dev/beta/release, or symantic
-           version or particular git commit hash), it's release by default,
-           is_local - optional flag defining way of scheduling sub-job, in
-           case is_local=false sub-jobs are scheduled against remote
-           execution engine, if is_local=true then sub_jobs are run as local
-           functions through CALLBACK mechanism, default value is false,
-           global_input - input data which is supposed to be sent as a part
-           to <module_name>.<method_name>_prepare() method, time_limit - time
-           limit in seconds, equals to 5000 by default.) -> structure:
-           parameter "module_name" of String, parameter "method_name" of
-           String, parameter "service_ver" of String, parameter "is_local" of
-           type "boolean" (A boolean - 0 for false, 1 for true. @range (0,
-           1)), parameter "global_input" of unspecified object, parameter
+           (Input parameters for run() method. method - optional method where
+           _prepare(), _runEach() and _collect() suffixes are applied,
+           prepare_method - optional method (if defined overrides _prepare
+           suffix rule), is_local - optional flag defining way of scheduling
+           sub-job, in case is_local=false sub-jobs are scheduled against
+           remote execution engine, if is_local=true then sub_jobs are run as
+           local functions through CALLBACK mechanism, default value is
+           false, global_input - input data which is supposed to be sent as a
+           part to <module_name>.<method_name>_prepare() method, time_limit -
+           time limit in seconds, equals to 5000 by default.) -> structure:
+           parameter "method" of type "FullMethodQualifier" (module_name -
+           SDK module name (ie. ManyHellos, RNAseq), method_name - method in
+           SDK module (TopHatcall, Hiseqcall etc each will have own
+           _prepare(), _runEach(), _collect() methods defined), service_ver -
+           optional version of SDK module (may be dev/beta/release, or
+           symantic version or particular git commit hash), it's release by
+           default,) -> structure: parameter "module_name" of String,
+           parameter "method_name" of String, parameter "service_ver" of
+           String, parameter "prepare_method" of type "FullMethodQualifier"
+           (module_name - SDK module name (ie. ManyHellos, RNAseq),
+           method_name - method in SDK module (TopHatcall, Hiseqcall etc each
+           will have own _prepare(), _runEach(), _collect() methods defined),
+           service_ver - optional version of SDK module (may be
+           dev/beta/release, or symantic version or particular git commit
+           hash), it's release by default,) -> structure: parameter
+           "module_name" of String, parameter "method_name" of String,
+           parameter "service_ver" of String, parameter "is_local" of type
+           "boolean" (A boolean - 0 for false, 1 for true. @range (0, 1)),
+           parameter "global_input" of unspecified object, parameter
            "time_limit" of Long
         :returns: instance of unspecified object
         """
@@ -96,12 +108,7 @@ class KBParallel:
         pprint( input_params )
 
         token = ctx['token']
-        module_name = input_params['module_name']
-        method_name = input_params['method_name']
-        module_method = module_name + '.' + method_name
-        service_ver = "release"
-        if 'service_ver' in input_params and input_params['service_ver'] is not None: 
-            service_ver = input_params['service_ver'] 
+        method = input_params.get('method')
 
 
         #instantiate ManyHellos client here
@@ -112,12 +119,25 @@ class KBParallel:
         # issue prepare call
         print( "about to invoke prepare()")
         prepare_input_params = {'global_input_params': input_params["global_params"], 
-                                'global_method': {'module_name': module_name,
-                                                  'method_name': method_name,
-                                                  'service_ver': service_ver}}
-        schedule = client.call_method(module_method + "_prepare",
+                                'global_method': method}
+        prepare_method_name = None
+        prepare_service_ver = None
+        if 'prepare_method' in input_params:
+            prepare_method = input_params.get('prepare_method')
+            prepare_method_name = (prepare_method['module_name'] + '.' + 
+                                   prepare_method['method_name'])
+            prepare_service_ver = prepare_method.get('service_ver')
+        else:
+            if not method:
+                raise ValueError("Global method wasn't defined but task doesn't provide " +
+                                 "local _runEach alternative")
+            module_name = method['module_name']
+            method_name = method['method_name']
+            prepare_method_name = module_name + '.' + method_name + "_prepare"
+            prepare_service_ver = method.get('service_ver', "release")
+        schedule = client.call_method(prepare_method_name,
                                       [prepare_input_params], 
-                                      service_ver = service_ver,
+                                      service_ver = prepare_service_ver,
                                       context=None)
         print( "back in run")
         tasks = schedule['tasks']
@@ -151,8 +171,13 @@ class KBParallel:
                                            task_method['method_name'])
                 task_service_ver = task_method.get('service_ver', None)
             else:
-                task_method_module_name = module_method + "_runEach"
-                task_service_ver = service_ver
+                if not method:
+                    raise ValueError("Global method wasn't defined but task doesn't provide " +
+                                     "local _runEach alternative")
+                module_name = method['module_name']
+                method_name = method['method_name']
+                task_method_module_name = module_name + '.' + method_name + "_runEach"
+                task_service_ver = method.get('service_ver', "release")
             task_input = task['input_arguments']
             
             jobid = exec_engine_client._submit_job(task_method_module_name,
@@ -162,7 +187,7 @@ class KBParallel:
             jobid_list.append( jobid )
             job_running_list.append( True )
             job_timeout_list.append( None )
-            job_input_result_map[jobid] = {"input": task}
+            job_input_result_map[jobid] = {'input': task}
             njobs = njobs + 1
 
         # Polling loop to see when job is finished
@@ -176,7 +201,14 @@ class KBParallel:
                 # poll each job
                 for j in range(0, njobs):
                     if job_running_list[j]:     # only consider those which are still running
-                        job_state_desc = exec_engine_client._check_job(module_name, jobid_list[j] )
+                        jobid = jobid_list[j]
+                        task = job_input_result_map[jobid]['input']
+                        task_module_name = None
+                        if 'method' in task:
+                            task_module_name = task['method']['module_name']
+                        else:
+                            task_module_name = method['module_name']
+                        job_state_desc = exec_engine_client._check_job(task_module_name, jobid )
                         pprint( job_state_desc )
     
                         if job_state_desc["finished"] == 1: # has this job completed
@@ -234,8 +266,13 @@ class KBParallel:
                                           collect_method['method_name'])
             collect_service_ver = collect_method['service_ver']
         else:
-            collect_module_method_name = module_method + "_collect"
-            collect_service_ver = service_ver
+            if not method:
+                raise ValueError("Global method wasn't defined but schedule doesn't provide " +
+                                 "local _collect alternative")
+            module_name = method['module_name']
+            method_name = method['method_name']
+            collect_module_method_name = module_name + '.' + method_name + "_collect"
+            collect_service_ver = method.get('service_ver', "release")
         print("Collect input: " + json.dumps(collect_input_params))
         returnVal = client.call_method(collect_module_method_name,
                                  [collect_input_params], 
