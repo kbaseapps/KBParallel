@@ -9,6 +9,7 @@ except:
     from baseclient import BaseClient as _BaseClient  # @Reimport
 import time
 import os
+import json
 from biokbase.njs_wrapper.client import NarrativeJobService as NJS
 
 
@@ -161,7 +162,7 @@ class KBParallel:
             jobid_list.append( jobid )
             job_running_list.append( True )
             job_timeout_list.append( None )
-            job_input_result_map[jobid] = {"input": task_input}
+            job_input_result_map[jobid] = {"input": task}
             njobs = njobs + 1
 
         # Polling loop to see when job is finished
@@ -190,7 +191,7 @@ class KBParallel:
                                 job_result = job_state_desc['result']
                                 if len(job_result) == 1:
                                     job_result = job_result[0]
-                                job_input_result_map[jobid_list[j]]['output'] = job_result
+                                job_input_result_map[jobid_list[j]]['result'] = job_result
                             else:
                                 raise Exception("Unexpected job state (no error/result fields")
                         else:                                                            # if its running, check for timeout
@@ -235,6 +236,7 @@ class KBParallel:
         else:
             collect_module_method_name = module_method + "_collect"
             collect_service_ver = service_ver
+        print("Collect input: " + json.dumps(collect_input_params))
         returnVal = client.call_method(collect_module_method_name,
                                  [collect_input_params], 
                                  service_ver = collect_service_ver,
