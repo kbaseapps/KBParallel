@@ -12,8 +12,8 @@ import us.kbase.common.service.JobState;
 import us.kbase.common.service.JsonClientCaller;
 import us.kbase.common.service.JsonClientException;
 import us.kbase.common.service.RpcContext;
+import us.kbase.common.service.UObject;
 import us.kbase.common.service.UnauthorizedException;
-import us.kbase.kbasereport.Report;
 
 /**
  * <p>Original spec-file module name: KBParallel</p>
@@ -202,7 +202,7 @@ public class KBParallelClient {
      * <pre>
      * </pre>
      * @param   inputParams   instance of type {@link us.kbase.kbparallel.KBParallelrunInputParams KBParallelrunInputParams}
-     * @return   parameter "rep" of type {@link us.kbase.kbasereport.Report Report}
+     * @return   instance of unspecified object
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
@@ -219,13 +219,13 @@ public class KBParallelClient {
      * <pre>
      * </pre>
      * @param   inputParams   instance of type {@link us.kbase.kbparallel.KBParallelrunInputParams KBParallelrunInputParams}
-     * @return   parameter "rep" of type {@link us.kbase.kbasereport.Report Report}
+     * @return   instance of unspecified object
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public Report run(KBParallelrunInputParams inputParams, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+    public UObject run(KBParallelrunInputParams inputParams, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
         String jobId = _runSubmit(inputParams, jsonRpcContext);
-        TypeReference<List<JobState<List<Report>>>> retType = new TypeReference<List<JobState<List<Report>>>>() {};
+        TypeReference<List<JobState<List<UObject>>>> retType = new TypeReference<List<JobState<List<UObject>>>>() {};
         long asyncJobCheckTimeMs = this.asyncJobCheckTimeMs;
         while (true) {
             if (Thread.currentThread().isInterrupted())
@@ -236,7 +236,7 @@ public class KBParallelClient {
                 throw new JsonClientException("Thread was interrupted", ex);
             }
             asyncJobCheckTimeMs = Math.min(asyncJobCheckTimeMs * this.asyncJobCheckTimeScalePercent / 100, this.asyncJobCheckMaxTimeMs);
-            JobState<List<Report>> res = _checkJob(jobId, retType);
+            JobState<List<UObject>> res = _checkJob(jobId, retType);
             if (res.getFinished() != 0L)
                 return res.getResult().get(0);
         }
