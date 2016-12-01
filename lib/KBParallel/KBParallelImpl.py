@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #BEGIN_HEADER
-from pprint import pprint
+from pprint import pprint,pformat
 try:
     # baseclient and this client are in a package
     from .baseclient import BaseClient as _BaseClient  # @UnusedImport
@@ -44,8 +44,8 @@ class KBParallel:
     # the latter method is running.
     ######################################### noqa
     VERSION = "0.0.7"
-    GIT_URL = "https://github.com/rsutormin/KBparallel"
-    GIT_COMMIT_HASH = "bb5314130d0ceaaddff9b835f02939e5b43a5405"
+    GIT_URL = "https://github.com/sean-mccorkle/KBparallel"
+    GIT_COMMIT_HASH = "e09860b56e22e348eb6ffc78b6b75517296761cc"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -56,11 +56,27 @@ class KBParallel:
         #BEGIN_CONSTRUCTOR
         self.callbackURL = os.environ['SDK_CALLBACK_URL']
         self.config = config
-        self.checkwait = 1     # seconds between checkjob calls
+
+        if not 'check_interval' in config:
+            self.config['check_interval'] = 30
+        self.checkwait = int(self.config['check_interval']) # seconds between checkjob calls
 
         # set default time limit
         if not 'time_limit' in config:
             self.config['time_limit'] = 5000000
+
+        # logging
+        self.__LOGGER = logging.getLogger('KBaseRNASeq')
+        if 'log_level' in config:
+              self.__LOGGER.setLevel(config['log_level'])
+        else:
+              self.__LOGGER.setLevel(logging.INFO)
+        streamHandler = logging.StreamHandler(sys.stdout)
+        formatter = logging.Formatter("%(asctime)s - %(filename)s - %(lineno)d - %(ip)s - %(levelname)s - %(message)s")
+        formatter.converter = time.gmtime
+        streamHandler.setFormatter(formatter)
+        self.__LOGGER.addHandler(streamHandler)
+        self.__LOGGER.info("Logger was set")
 
         #END_CONSTRUCTOR
         pass
@@ -104,20 +120,19 @@ class KBParallel:
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN run
-        print( "Hi this is KBParallel.run() input_params are")
-        pprint( input_params )
+        self.__LOGGER.debug("Input params:\n" + pformat( input_params ))
 
         token = ctx['token']
         method = input_params.get('method')
 
 
         #instantiate ManyHellos client here
-        print( "about to initiate client .." )
+        self.__LOGGER.info( "Initiate baseclient .." )
         client = _BaseClient(self.callbackURL, token=token)
 
 
         # issue prepare call
-        print( "about to invoke prepare()")
+        self.__LOGGER.info( "Invoke prepare()")
         prepare_input_params = {'global_input_params': input_params["global_params"], 
                                 'global_method': method}
         prepare_method_name = None
@@ -139,13 +154,13 @@ class KBParallel:
                                       [prepare_input_params], 
                                       service_ver = prepare_service_ver,
                                       context=None)
-        print( "back in run")
+        self.__LOGGER.debug( "Back in run")
         tasks = schedule['tasks']
         collect_method = schedule.get('collect_method', None)
-        pprint( tasks )
+        self.__LOGGER.info("Task list:\n" + pformat(tasks) )
 
         # initiate NJS wrapper
-        print( "initiating Execution Engine")
+        self.__LOGGER.info( "Initiating Execution Engine")
         exec_engine_url = None
         remote_ee_client = None
         is_local = ('is_local' in input_params and input_params['is_local'] == 1)
@@ -162,7 +177,7 @@ class KBParallel:
         njobs = 0
         job_input_result_map = {}
         for task in tasks:
-            pprint( ["   launching task", task]  )
+            self.__LOGGER.info( "Launching task:" + pformat(task) )
             task_method_module_name = None
             task_service_ver = None
             if 'method' in task:
@@ -179,11 +194,14 @@ class KBParallel:
                 task_method_module_name = module_name + '.' + method_name + "_runEach"
                 task_service_ver = method.get('service_ver', "release")
             task_input = task['input_arguments']
+
+            if not isinstance(task_input, list): #for sementic compatibility w/ prepare and collect
+                task_input = [task_input]
             
             jobid = exec_engine_client._submit_job(task_method_module_name,
                                                    task_input, 
                                                    service_ver=task_service_ver)
-            print( "job_id", jobid )
+            self.__LOGGER.info( "Job_id: ", jobid )
             jobid_list.append( jobid )
             job_running_list.append( True )
             job_timeout_list.append( None )
@@ -192,8 +210,8 @@ class KBParallel:
 
         # Polling loop to see when job is finished
 
-        print("polling ", njobs, " NJS job status")
-        pprint(job_running_list)
+        self.__LOGGER.info("Polling " +  njobs + " NJS job status")
+        self.__LOGGER.info(pformat(job_running_list))
         njobs_remaining = njobs      # this will count down to 0 when all jobs completed
         try:
             while njobs_remaining > 0:
@@ -209,15 +227,15 @@ class KBParallel:
                         else:
                             task_module_name = method['module_name']
                         job_state_desc = exec_engine_client._check_job(task_module_name, jobid )
-                        pprint( job_state_desc )
+                        self.__LOGGER.info( "Job state:" + pformat(job_state_desc))
     
                         if job_state_desc["finished"] == 1: # has this job completed
-                            print( "**************job ", j, " is done***********" )
+                            self.__LOGGER.info( "**************job ", j, " is done***********" )
                             job_running_list[j] = False
                             njobs_remaining = njobs_remaining - 1
     
                             if "error" in job_state_desc:                                # if it crashed, 
-                                print( "************** job ", j, " has crashed*********" )
+                                self.__LOGGER.info( "************** job ", j, " has crashed*********" )
                                 raise Exception("jobs canceled because of failure")
                             elif 'result' in job_state_desc:
                                 job_result = job_state_desc['result']
@@ -227,7 +245,7 @@ class KBParallel:
                             else:
                                 raise Exception("Unexpected job state (no error/result fields")
                         else:                                                            # if its running, check for timeout
-                            print( "checking timeout for this job" )
+                            self.__LOGGER.info( "checking timeout for this job" )
                             # check timeout of job
                             if job_timeout_list[j] == None :
                                 job_timeout_list[j] = time.time() + 60 * self.config['time_limit']   # start the clock if just started
@@ -243,19 +261,19 @@ class KBParallel:
             else:
                 jobs_to_stop = reduce_list( jobid_list, job_running_list )
                 if len(jobs_to_stop) > 0:
-                    print("Stopping all sub-jobs...")
+                    self.__LOGGER.info("Stopping all sub-jobs...")
                     for jobid in jobs_to_stop:
                         try:
                             remote_ee_client.cancel_job( { 'job_id': jobid } )
                         except:
-                            print("Error canceling job " + jobid)
+                            self.__LOGGER.info("Error canceling job " + jobid)
 
         # at this point, NJS informed us that job is finished, must now check error status
 
         # Question: best way to determine a successful completion or not from the
         #           jobs state
 
-        print( "about to invoke collect()" )
+        self.__LOGGER.info( "about to invoke collect()" )
         input_result_pairs = [job_input_result_map[key] for key in job_input_result_map]
         collect_input_params = {'global_params': input_params["global_params"],
                                 'input_result_pairs': input_result_pairs}
@@ -273,12 +291,12 @@ class KBParallel:
             method_name = method['method_name']
             collect_module_method_name = module_name + '.' + method_name + "_collect"
             collect_service_ver = method.get('service_ver', "release")
-        print("Collect input: " + json.dumps(collect_input_params))
+        self.__LOGGER.info("Collect input: " + json.dumps(collect_input_params))
         returnVal = client.call_method(collect_module_method_name,
                                  [collect_input_params], 
                                  service_ver = collect_service_ver,
                                  context=None)
-        pprint( returnVal )
+        self.__LOGGER.info("Result:\n" + pformat(returnVal))
         #END run
 
         # At some point might do deeper type checking...
