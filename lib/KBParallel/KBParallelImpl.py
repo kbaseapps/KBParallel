@@ -10,6 +10,7 @@ except:
 import time
 import os
 import json
+import logging
 from biokbase.njs_wrapper.client import NarrativeJobService as NJS
 
 
