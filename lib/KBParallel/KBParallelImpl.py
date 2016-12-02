@@ -122,19 +122,24 @@ class KBParallel:
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN run
+        method = input_params.get('method')
+        service_ver = method.get('service_ver', "release")
+        
+        if service_ver == "dev":
+            self.__LOGGER.setLevel(logging.DEBUG)
+
         self.__LOGGER.debug("Input params:\n" + pformat( input_params ))
 
         token = ctx['token']
-        method = input_params.get('method')
 
 
         #instantiate ManyHellos client here
-        self.__LOGGER.info( "Initiate baseclient .." )
+        self.__LOGGER.info( "Initiate baseclient ..." )
         client = _BaseClient(self.callbackURL, token=token)
 
 
         # issue prepare call
-        self.__LOGGER.info( "Invoke prepare()")
+        self.__LOGGER.info( "Invoke prepare() ...")
         prepare_input_params = {'global_input_params': input_params["global_params"], 
                                 'global_method': method}
         prepare_method_name = None
@@ -156,13 +161,13 @@ class KBParallel:
                                       [prepare_input_params], 
                                       service_ver = prepare_service_ver,
                                       context=None)
-        self.__LOGGER.debug( "Back in run")
+        self.__LOGGER.info( "Back in run")
         tasks = schedule['tasks']
         collect_method = schedule.get('collect_method', None)
-        self.__LOGGER.info("Task list:\n" + pformat(tasks) )
+        self.__LOGGER.debug("Task list:\n" + pformat(tasks) )
 
         # initiate NJS wrapper
-        self.__LOGGER.info( "Initiating Execution Engine")
+        self.__LOGGER.info( "Initiating execution engine")
         exec_engine_url = None
         remote_ee_client = None
         is_local = ('is_local' in input_params and input_params['is_local'] == 1)
@@ -203,7 +208,7 @@ class KBParallel:
             jobid = exec_engine_client._submit_job(task_method_module_name,
                                                    task_input, 
                                                    service_ver=task_service_ver)
-            self.__LOGGER.info( "Job_id: ", jobid )
+            self.__LOGGER.info( "Job_id: {}".format(jobid) )
             jobid_list.append( jobid )
             job_running_list.append( True )
             job_timeout_list.append( None )
@@ -213,7 +218,7 @@ class KBParallel:
         # Polling loop to see when job is finished
 
         self.__LOGGER.info("Polling {} NJS job status".format(njobs))
-        self.__LOGGER.info(pformat(job_running_list))
+        self.__LOGGER.debug(pformat(job_running_list))
         njobs_remaining = njobs      # this will count down to 0 when all jobs completed
         try:
             while njobs_remaining > 0:
@@ -232,12 +237,12 @@ class KBParallel:
                         self.__LOGGER.info( "Job state:" + pformat(job_state_desc))
     
                         if job_state_desc["finished"] == 1: # has this job completed
-                            self.__LOGGER.info( "**************job ", j, " is done***********" )
+                            self.__LOGGER.info( "**************job {} is done***********".format(j) )
                             job_running_list[j] = False
                             njobs_remaining = njobs_remaining - 1
     
                             if "error" in job_state_desc:                                # if it crashed, 
-                                self.__LOGGER.info( "************** job ", j, " has crashed*********" )
+                                self.__LOGGER.error( "************** job ", j, " has crashed*********" )
                                 raise Exception("jobs canceled because of failure")
                             elif 'result' in job_state_desc:
                                 job_result = job_state_desc['result']
@@ -247,12 +252,12 @@ class KBParallel:
                             else:
                                 raise Exception("Unexpected job state (no error/result fields")
                         else:                                                            # if its running, check for timeout
-                            self.__LOGGER.info( "checking timeout for this job" )
+                            self.__LOGGER.debug( "checking timeout for this job" )
                             # check timeout of job
                             if job_timeout_list[j] == None :
                                 job_timeout_list[j] = time.time() + 60 * self.config['time_limit']   # start the clock if just started
                             if time.time() > job_timeout_list[j] :
-                                print "*************TIMEOUT****************"
+                                self.__LOGGER.error( "*************TIMEOUT****************")
                                 raise Exception("jobs canceled because of timeout")
     
                 time.sleep( self.checkwait )
@@ -263,19 +268,19 @@ class KBParallel:
             else:
                 jobs_to_stop = reduce_list( jobid_list, job_running_list )
                 if len(jobs_to_stop) > 0:
-                    self.__LOGGER.info("Stopping all sub-jobs...")
+                    self.__LOGGER.warning("Stopping all sub-jobs...")
                     for jobid in jobs_to_stop:
                         try:
                             remote_ee_client.cancel_job( { 'job_id': jobid } )
                         except:
-                            self.__LOGGER.info("Error canceling job " + jobid)
+                            self.__LOGGER.warning("Error canceling job " + jobid)
 
         # at this point, NJS informed us that job is finished, must now check error status
 
         # Question: best way to determine a successful completion or not from the
         #           jobs state
 
-        self.__LOGGER.info( "about to invoke collect()" )
+        self.__LOGGER.info( "Invoke collect()" )
         input_result_pairs = [job_input_result_map[key] for key in job_input_result_map]
         collect_input_params = {'global_params': input_params["global_params"],
                                 'input_result_pairs': input_result_pairs}
@@ -293,12 +298,12 @@ class KBParallel:
             method_name = method['method_name']
             collect_module_method_name = module_name + '.' + method_name + "_collect"
             collect_service_ver = method.get('service_ver', "release")
-        self.__LOGGER.info("Collect input: " + json.dumps(collect_input_params))
+        self.__LOGGER.debug("Collect input: " + json.dumps(collect_input_params))
         returnVal = client.call_method(collect_module_method_name,
                                  [collect_input_params], 
                                  service_ver = collect_service_ver,
                                  context=None)
-        self.__LOGGER.info("Result:\n" + pformat(returnVal))
+        self.__LOGGER.debug("Result:\n" + pformat(returnVal))
         #END run
 
         # At some point might do deeper type checking...
