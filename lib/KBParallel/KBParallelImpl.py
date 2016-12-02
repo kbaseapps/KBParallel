@@ -9,6 +9,7 @@ except:
     from baseclient import BaseClient as _BaseClient  # @Reimport
 import time
 import os
+import sys
 import json
 import logging
 from biokbase.njs_wrapper.client import NarrativeJobService as NJS
