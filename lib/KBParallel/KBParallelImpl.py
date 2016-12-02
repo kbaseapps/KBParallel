@@ -74,7 +74,7 @@ class KBParallel:
         else:
               self.__LOGGER.setLevel(logging.INFO)
         streamHandler = logging.StreamHandler(sys.stdout)
-        formatter = logging.Formatter("%(asctime)s - %(filename)s - %(lineno)d - %(ip)s - %(levelname)s - %(message)s")
+        formatter = logging.Formatter("%(asctime)s - %(filename)s - %(lineno)d - %(levelname)s - %(message)s")
         formatter.converter = time.gmtime
         streamHandler.setFormatter(formatter)
         self.__LOGGER.addHandler(streamHandler)
@@ -212,7 +212,7 @@ class KBParallel:
 
         # Polling loop to see when job is finished
 
-        self.__LOGGER.info("Polling " +  njobs + " NJS job status")
+        self.__LOGGER.info("Polling {} NJS job status".format(njobs))
         self.__LOGGER.info(pformat(job_running_list))
         njobs_remaining = njobs      # this will count down to 0 when all jobs completed
         try:
