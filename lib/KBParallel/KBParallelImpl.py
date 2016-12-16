@@ -67,6 +67,9 @@ class KBParallel:
         if not 'time_limit' in config:
             self.config['time_limit'] = 5000000
 
+        if not 'sync_cb_time_limit' in config:
+            self.config['sync_cb_time_limit'] = 14400 # 4 hours for large genome object
+
         # logging
         self.__LOGGER = logging.getLogger('KBaseRNASeq')
         if 'log_level' in config:
@@ -135,7 +138,7 @@ class KBParallel:
 
         #instantiate ManyHellos client here
         self.__LOGGER.info( "Initiate baseclient ..." )
-        client = _BaseClient(self.callbackURL, token=token)
+        client = _BaseClient(self.callbackURL, token=token, timeout = self.config['sync_cb_time_limit'])
 
 
         # issue prepare call
