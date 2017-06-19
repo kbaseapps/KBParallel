@@ -27,7 +27,7 @@ KBParallel::KBParallelClient
 =head1 DESCRIPTION
 
 
-
+A KBase module: KBParallel
 
 
 =cut
@@ -57,7 +57,7 @@ sub new
     }
     my $service_version = undef;
     if (exists $arg_hash{"service_version"}) {
-        $service_version = $arg_hash{"async_version"};
+        $service_version = $arg_hash{"service_version"};
     }
     $self->{service_version} = $service_version;
 
@@ -100,20 +100,19 @@ sub new
     # We create an auth token, passing through the arguments that we were (hopefully) given.
 
     {
-	my $token = Bio::KBase::AuthToken->new(@args);
-	
-	if (!$token->error_message)
-	{
-	    $self->{token} = $token->token;
-	    $self->{client}->{token} = $token->token;
+	my %arg_hash2 = @args;
+	if (exists $arg_hash2{"token"}) {
+	    $self->{token} = $arg_hash2{"token"};
+	} elsif (exists $arg_hash2{"user_id"}) {
+	    my $token = Bio::KBase::AuthToken->new(@args);
+	    if (!$token->error_message) {
+	        $self->{token} = $token->token;
+	    }
 	}
-        else
-        {
-	    #
-	    # All methods in this module require authentication. In this case, if we
-	    # don't have a token, we can't continue.
-	    #
-	    die "Authentication failed: " . $token->error_message;
+	
+	if (exists $self->{token})
+	{
+	    $self->{client}->{token} = $self->{token};
 	}
     }
 
@@ -163,6 +162,138 @@ sub _check_job {
 }
 
 
+
+
+=head2 run_batch
+
+  $results = $obj->run_batch($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a KBParallel.RunBatchParams
+$results is a KBParallel.BatchResults
+RunBatchParams is a reference to a hash where the following keys are defined:
+	tasks has a value which is a reference to a list where each element is a KBParallel.Task
+	concurrent_local_tasks has a value which is an int
+	concurrent_njsw_tasks has a value which is an int
+	n_retry_failed_tasks has a value which is an int
+Task is a reference to a hash where the following keys are defined:
+	function has a value which is a KBParallel.Function
+	params has a value which is an UnspecifiedObject, which can hold any non-null object
+	run_local has a value which is a KBParallel.boolean
+Function is a reference to a hash where the following keys are defined:
+	name has a value which is a string
+	module_name has a value which is a string
+	version has a value which is a string
+boolean is an int
+BatchResults is a reference to a hash where the following keys are defined:
+	results has a value which is a reference to a list where each element is a KBParallel.TaskResult
+TaskResult is a reference to a hash where the following keys are defined:
+	function has a value which is a KBParallel.Function
+	params has a value which is an UnspecifiedObject, which can hold any non-null object
+	returned has a value which is an UnspecifiedObject, which can hold any non-null object
+	error has a value which is an UnspecifiedObject, which can hold any non-null object
+	run_context has a value which is a KBParallel.RunContext
+RunContext is a reference to a hash where the following keys are defined:
+	location has a value which is a string
+	job_id has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a KBParallel.RunBatchParams
+$results is a KBParallel.BatchResults
+RunBatchParams is a reference to a hash where the following keys are defined:
+	tasks has a value which is a reference to a list where each element is a KBParallel.Task
+	concurrent_local_tasks has a value which is an int
+	concurrent_njsw_tasks has a value which is an int
+	n_retry_failed_tasks has a value which is an int
+Task is a reference to a hash where the following keys are defined:
+	function has a value which is a KBParallel.Function
+	params has a value which is an UnspecifiedObject, which can hold any non-null object
+	run_local has a value which is a KBParallel.boolean
+Function is a reference to a hash where the following keys are defined:
+	name has a value which is a string
+	module_name has a value which is a string
+	version has a value which is a string
+boolean is an int
+BatchResults is a reference to a hash where the following keys are defined:
+	results has a value which is a reference to a list where each element is a KBParallel.TaskResult
+TaskResult is a reference to a hash where the following keys are defined:
+	function has a value which is a KBParallel.Function
+	params has a value which is an UnspecifiedObject, which can hold any non-null object
+	returned has a value which is an UnspecifiedObject, which can hold any non-null object
+	error has a value which is an UnspecifiedObject, which can hold any non-null object
+	run_context has a value which is a KBParallel.RunContext
+RunContext is a reference to a hash where the following keys are defined:
+	location has a value which is a string
+	job_id has a value which is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub run_batch
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function run_batch (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to run_batch:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'run_batch');
+	}
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "KBParallel.run_batch",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'run_batch',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method run_batch",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'run_batch',
+				       );
+    }
+}
+ 
 
 
 =head2 run
@@ -265,7 +396,7 @@ sub _run_submit {
     }
     my $result = $self->{client}->call($self->{url}, $self->{headers}, {
         method => "KBParallel._run_submit",
-        params => \@args}, context => $context);
+        params => \@args, context => $context});
     if ($result) {
         if ($result->is_error) {
             Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
@@ -662,6 +793,218 @@ an int
 =begin text
 
 an int
+
+=end text
+
+=back
+
+
+
+=head2 Function
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+name has a value which is a string
+module_name has a value which is a string
+version has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+name has a value which is a string
+module_name has a value which is a string
+version has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 Task
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+function has a value which is a KBParallel.Function
+params has a value which is an UnspecifiedObject, which can hold any non-null object
+run_local has a value which is a KBParallel.boolean
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+function has a value which is a KBParallel.Function
+params has a value which is an UnspecifiedObject, which can hold any non-null object
+run_local has a value which is a KBParallel.boolean
+
+
+=end text
+
+=back
+
+
+
+=head2 RunContext
+
+=over 4
+
+
+
+=item Description
+
+location = local | njsw
+job_id = '' | [njsw_job_id]
+
+May want to add: AWE node ID, client group, total run time, etc
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+location has a value which is a string
+job_id has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+location has a value which is a string
+job_id has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 TaskResult
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+function has a value which is a KBParallel.Function
+params has a value which is an UnspecifiedObject, which can hold any non-null object
+returned has a value which is an UnspecifiedObject, which can hold any non-null object
+error has a value which is an UnspecifiedObject, which can hold any non-null object
+run_context has a value which is a KBParallel.RunContext
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+function has a value which is a KBParallel.Function
+params has a value which is an UnspecifiedObject, which can hold any non-null object
+returned has a value which is an UnspecifiedObject, which can hold any non-null object
+error has a value which is an UnspecifiedObject, which can hold any non-null object
+run_context has a value which is a KBParallel.RunContext
+
+
+=end text
+
+=back
+
+
+
+=head2 BatchResults
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+results has a value which is a reference to a list where each element is a KBParallel.TaskResult
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+results has a value which is a reference to a list where each element is a KBParallel.TaskResult
+
+
+=end text
+
+=back
+
+
+
+=head2 RunBatchParams
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+tasks has a value which is a reference to a list where each element is a KBParallel.Task
+concurrent_local_tasks has a value which is an int
+concurrent_njsw_tasks has a value which is an int
+n_retry_failed_tasks has a value which is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+tasks has a value which is a reference to a list where each element is a KBParallel.Task
+concurrent_local_tasks has a value which is an int
+concurrent_njsw_tasks has a value which is an int
+n_retry_failed_tasks has a value which is an int
+
 
 =end text
 

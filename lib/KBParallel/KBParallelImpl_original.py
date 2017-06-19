@@ -36,7 +36,7 @@ class KBParallel:
     KBParallel
 
     Module Description:
-    A KBase module: KBParallel
+    
     '''
 
     ######## WARNING FOR GEVENT USERS ####### noqa
@@ -46,8 +46,8 @@ class KBParallel:
     # the latter method is running.
     ######################################### noqa
     VERSION = "0.0.7"
-    GIT_URL = "git@github.com:kbaseapps/KBParallel"
-    GIT_COMMIT_HASH = "80675cd220ff1429eb437469f99647e06b2e52b3"
+    GIT_URL = "https://github.com/sean-mccorkle/KBparallel"
+    GIT_COMMIT_HASH = "e09860b56e22e348eb6ffc78b6b75517296761cc"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -86,40 +86,6 @@ class KBParallel:
         #END_CONSTRUCTOR
         pass
 
-
-    def run_batch(self, ctx, params):
-        """
-        :param params: instance of type "RunBatchParams" -> structure:
-           parameter "tasks" of list of type "Task" -> structure: parameter
-           "function" of type "Function" -> structure: parameter "name" of
-           String, parameter "module_name" of String, parameter "version" of
-           String, parameter "params" of unspecified object, parameter
-           "run_local" of type "boolean" (A boolean - 0 for false, 1 for
-           true. @range (0, 1)), parameter "concurrent_local_tasks" of Long,
-           parameter "concurrent_njsw_tasks" of Long, parameter
-           "n_retry_failed_tasks" of Long
-        :returns: instance of type "BatchResults" -> structure: parameter
-           "results" of list of type "TaskResult" -> structure: parameter
-           "function" of type "Function" -> structure: parameter "name" of
-           String, parameter "module_name" of String, parameter "version" of
-           String, parameter "params" of unspecified object, parameter
-           "returned" of unspecified object, parameter "error" of unspecified
-           object, parameter "run_context" of type "RunContext" (location =
-           local | njsw job_id = '' | [njsw_job_id] May want to add: AWE node
-           ID, client group, total run time, etc) -> structure: parameter
-           "location" of String, parameter "job_id" of String
-        """
-        # ctx is the context object
-        # return variables are: results
-        #BEGIN run_batch
-        #END run_batch
-
-        # At some point might do deeper type checking...
-        if not isinstance(results, dict):
-            raise ValueError('Method run_batch return value ' +
-                             'results is not type dict as required.')
-        # return the results
-        return [results]
 
     def run(self, ctx, input_params):
         """

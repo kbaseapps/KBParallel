@@ -20,7 +20,7 @@ from KBParallel.authclient import KBaseAuth as _KBaseAuth
 
 DEPLOY = 'KB_DEPLOYMENT_CONFIG'
 SERVICE = 'KB_SERVICE_NAME'
-AUTH = 'auth-server-url'
+AUTH = 'auth-service-url'
 
 # Note that the error fields do not match the 2.0 JSONRPC spec
 
@@ -109,7 +109,11 @@ class JSONRPCServiceCustom(JSONRPCService):
             # Exception was raised inside the method.
             newerr = JSONServerError()
             newerr.trace = traceback.format_exc()
-            newerr.data = e.message
+            if isinstance(e.message, basestring):
+                newerr.data = e.message
+            else:
+                # Some exceptions embed other exceptions as the message
+                newerr.data = repr(e.message)
             raise newerr
         return result
 
@@ -329,22 +333,26 @@ class Application(object):
         self.serverlog.set_log_level(6)
         self.rpc_service = JSONRPCServiceCustom()
         self.method_authentication = dict()
+        self.rpc_service.add(impl_KBParallel.run_batch,
+                             name='KBParallel.run_batch',
+                             types=[dict])
+        self.method_authentication['KBParallel.run_batch'] = 'required'  # noqa
         self.rpc_service.add(impl_KBParallel.run,
                              name='KBParallel.run',
                              types=[dict])
-        self.method_authentication['KBParallel.run'] = 'required' # noqa
+        self.method_authentication['KBParallel.run'] = 'required'  # noqa
         self.rpc_service.add(impl_KBParallel.job_status,
                              name='KBParallel.job_status',
                              types=[dict])
-        self.method_authentication['KBParallel.job_status'] = 'required' # noqa
+        self.method_authentication['KBParallel.job_status'] = 'required'  # noqa
         self.rpc_service.add(impl_KBParallel.cancel_run,
                              name='KBParallel.cancel_run',
                              types=[dict])
-        self.method_authentication['KBParallel.cancel_run'] = 'required' # noqa
+        self.method_authentication['KBParallel.cancel_run'] = 'required'  # noqa
         self.rpc_service.add(impl_KBParallel.getlog,
                              name='KBParallel.getlog',
                              types=[dict])
-        self.method_authentication['KBParallel.getlog'] = 'required' # noqa
+        self.method_authentication['KBParallel.getlog'] = 'required'  # noqa
         self.rpc_service.add(impl_KBParallel.status,
                              name='KBParallel.status',
                              types=[dict])

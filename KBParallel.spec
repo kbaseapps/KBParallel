@@ -49,6 +49,7 @@ module KBParallel {
     } BatchResults;
 
 
+    /* To run local */
     typedef structure {
         list <Task> tasks;
         int concurrent_local_tasks;

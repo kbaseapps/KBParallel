@@ -8,11 +8,15 @@ class Task(object):
         self.module_name = module_name
         self.function_name = function_name
 
+
         self.version = 'release'
         if version:
             self.version = version
 
-        self.parameters = parameters
+        if isinstance(parameters, list) or isinstance(parameters, tuple):
+            self.parameters = parameters
+        else:
+            self.parameters = [parameters]
 
         self.token = token
 
@@ -28,10 +32,10 @@ class Task(object):
                 callback_server_url - runs locally
                 njsw_url - submits to run on a cluster
         '''
-        self.execution_engine = BaseClient(runner_url, token=self._token)
-        self._job_id = self._execution_engine._submit_job(self.function_specification_string,
-                                                          self.parameters,
-                                                          service_ver=self.version)
+        self.execution_engine = BaseClient(runner_url, token=self.token)
+        self._job_id = self.execution_engine._submit_job(self.module_name + '.' + self.function_name,
+                                                         self.parameters,
+                                                         service_ver=self.version)
         self.run_location = run_location
         return self._job_id
 
@@ -44,7 +48,7 @@ class Task(object):
         return False
 
 
-    def finished_successfully(self):
+    def success(self):
         ''' returns True if finished, no errors were reported, and result is defined.  False otherwise '''
         self.check_job_state()
         if self._final_job_state:
@@ -79,12 +83,12 @@ class Task(object):
                                           'job_id': self._job_id}
                           }
         if 'error' in self._final_job_state and self._final_job_state['error']:
-            result_package['error'] = self.final_job_state['error']
+            result_package['error'] = self._final_job_state['error']
         if 'result' in self._final_job_state and self._final_job_state['result']:
-            result_package['result'] = self.final_job_state['result']
+            result_package['result'] = self._final_job_state['result']
 
         result = {'result_package': result_package,
-                  'is_error': not self.finished_successfully(),
+                  'is_error': not self.success(),
                   'final_job_state': self._final_job_state}
         return result
 
@@ -98,7 +102,7 @@ class Task(object):
             return self._final_job_state
 
         # otherwise we need to call the execution engine
-        job_state = self._execution_engine._check_job(self.module_name, self._job_id)
+        job_state = self.execution_engine._check_job(self.module_name, self._job_id)
 
         # job is finished, so remember that
         if job_state['finished'] == 1:

@@ -43,6 +43,32 @@ class KBParallel(object):
     def _check_job(self, job_id):
         return self._client._check_job('KBParallel', job_id)
 
+    def run_batch(self, params, context=None):
+        """
+        :param params: instance of type "RunBatchParams" -> structure:
+           parameter "tasks" of list of type "Task" -> structure: parameter
+           "function" of type "Function" -> structure: parameter "name" of
+           String, parameter "module_name" of String, parameter "version" of
+           String, parameter "params" of unspecified object, parameter
+           "run_local" of type "boolean" (A boolean - 0 for false, 1 for
+           true. @range (0, 1)), parameter "concurrent_local_tasks" of Long,
+           parameter "concurrent_njsw_tasks" of Long, parameter
+           "n_retry_failed_tasks" of Long
+        :returns: instance of type "BatchResults" -> structure: parameter
+           "results" of list of type "TaskResult" -> structure: parameter
+           "function" of type "Function" -> structure: parameter "name" of
+           String, parameter "module_name" of String, parameter "version" of
+           String, parameter "params" of unspecified object, parameter
+           "returned" of unspecified object, parameter "error" of unspecified
+           object, parameter "run_context" of type "RunContext" (location =
+           local | njsw job_id = '' | [njsw_job_id] May want to add: AWE node
+           ID, client group, total run time, etc) -> structure: parameter
+           "location" of String, parameter "job_id" of String
+        """
+        return self._client.call_method(
+            'KBParallel.run_batch',
+            [params], self._service_ver, context)
+
     def _run_submit(self, input_params, context=None):
         return self._client._submit_job(
              'KBParallel.run', [input_params],

@@ -18,6 +18,7 @@ import us.kbase.common.service.UnauthorizedException;
 /**
  * <p>Original spec-file module name: KBParallel</p>
  * <pre>
+ * A KBase module: KBParallel
  * </pre>
  */
 public class KBParallelClient {
@@ -194,6 +195,23 @@ public class KBParallelClient {
         List<Object> args = new ArrayList<Object>();
         args.add(jobId);
         List<JobState<T>> res = caller.jsonrpcCall("KBParallel._check_job", args, retType, true, true);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: run_batch</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.kbparallel.RunBatchParams RunBatchParams}
+     * @return   parameter "results" of type {@link us.kbase.kbparallel.BatchResults BatchResults}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public BatchResults runBatch(RunBatchParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<BatchResults>> retType = new TypeReference<List<BatchResults>>() {};
+        List<BatchResults> res = caller.jsonrpcCall("KBParallel.run_batch", args, retType, true, true, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
