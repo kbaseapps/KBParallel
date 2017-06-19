@@ -1,7 +1,6 @@
 /*
 A KBase module: KBParallel
 */
-#include <KBaseReport.spec>
 
 module KBParallel {
 
@@ -10,6 +9,58 @@ module KBParallel {
         @range (0, 1)
     */
     typedef int boolean;
+
+    typedef structure {
+        string module_name;
+        string function_name;
+        string version;
+    } Function;
+
+    /* */
+    typedef structure {
+        Function function;
+        UnspecifiedObject params;
+        boolean run_local;
+    } Task;
+
+    /*
+        location = local | njsw
+        job_id = '' | [njsw_job_id]
+
+        May want to add: AWE node ID, client group, total run time, etc
+    */
+    typedef structure {
+        string location;
+        string job_id;
+    } RunContext;
+
+    typedef structure {
+        Function function;
+        UnspecifiedObject params;
+        UnspecifiedObject returned;
+        UnspecifiedObject error;
+
+        RunContext run_context;
+    } TaskResult;
+
+
+    typedef structure {
+        list <TaskResult> results;
+    } BatchResults;
+
+
+    typedef structure {
+        list <Task> tasks;
+        int concurrent_local_tasks;
+        int concurrent_njsw_tasks;
+        int n_retry_failed_tasks;
+    } RunBatchParams;
+
+
+    funcdef run_batch(RunBatchParams params)
+        returns (BatchResults results) authentication required;
+
+
 
     /*
         module_name - SDK module name (ie. ManyHellos, RNAseq),
