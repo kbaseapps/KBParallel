@@ -19,34 +19,19 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
-    "name",
     "module_name",
+    "function_name",
     "version"
 })
 public class Function {
 
-    @JsonProperty("name")
-    private String name;
     @JsonProperty("module_name")
     private String moduleName;
+    @JsonProperty("function_name")
+    private String functionName;
     @JsonProperty("version")
     private String version;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
-
-    @JsonProperty("name")
-    public String getName() {
-        return name;
-    }
-
-    @JsonProperty("name")
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Function withName(String name) {
-        this.name = name;
-        return this;
-    }
 
     @JsonProperty("module_name")
     public String getModuleName() {
@@ -60,6 +45,21 @@ public class Function {
 
     public Function withModuleName(String moduleName) {
         this.moduleName = moduleName;
+        return this;
+    }
+
+    @JsonProperty("function_name")
+    public String getFunctionName() {
+        return functionName;
+    }
+
+    @JsonProperty("function_name")
+    public void setFunctionName(String functionName) {
+        this.functionName = functionName;
+    }
+
+    public Function withFunctionName(String functionName) {
+        this.functionName = functionName;
         return this;
     }
 
@@ -90,7 +90,7 @@ public class Function {
 
     @Override
     public String toString() {
-        return ((((((((("Function"+" [name=")+ name)+", moduleName=")+ moduleName)+", version=")+ version)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((("Function"+" [moduleName=")+ moduleName)+", functionName=")+ functionName)+", version=")+ version)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

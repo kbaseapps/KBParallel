@@ -46,9 +46,9 @@ class KBParallel:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "0.0.7"
+    VERSION = "0.0.8"
     GIT_URL = "git@github.com:kbaseapps/KBParallel"
-    GIT_COMMIT_HASH = "80675cd220ff1429eb437469f99647e06b2e52b3"
+    GIT_COMMIT_HASH = "9cbfdb84df233571eb4d5e1c4da87608b2506add"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -90,25 +90,27 @@ class KBParallel:
 
     def run_batch(self, ctx, params):
         """
-        :param params: instance of type "RunBatchParams" -> structure:
-           parameter "tasks" of list of type "Task" -> structure: parameter
-           "function" of type "Function" -> structure: parameter "name" of
-           String, parameter "module_name" of String, parameter "version" of
-           String, parameter "params" of unspecified object, parameter
+        :param params: instance of type "RunBatchParams" (runner =
+           serial_local | parallel_local | parallel) -> structure: parameter
+           "tasks" of list of type "Task" -> structure: parameter "function"
+           of type "Function" -> structure: parameter "module_name" of
+           String, parameter "function_name" of String, parameter "version"
+           of String, parameter "params" of unspecified object, parameter
            "run_local" of type "boolean" (A boolean - 0 for false, 1 for
-           true. @range (0, 1)), parameter "concurrent_local_tasks" of Long,
-           parameter "concurrent_njsw_tasks" of Long, parameter
-           "n_retry_failed_tasks" of Long
+           true. @range (0, 1)), parameter "runner" of String, parameter
+           "concurrent_local_tasks" of Long, parameter
+           "concurrent_njsw_tasks" of Long, parameter "max_retries" of Long
         :returns: instance of type "BatchResults" -> structure: parameter
            "results" of list of type "TaskResult" -> structure: parameter
-           "function" of type "Function" -> structure: parameter "name" of
-           String, parameter "module_name" of String, parameter "version" of
-           String, parameter "params" of unspecified object, parameter
-           "returned" of unspecified object, parameter "error" of unspecified
-           object, parameter "run_context" of type "RunContext" (location =
-           local | njsw job_id = '' | [njsw_job_id] May want to add: AWE node
-           ID, client group, total run time, etc) -> structure: parameter
-           "location" of String, parameter "job_id" of String
+           "function" of type "Function" -> structure: parameter
+           "module_name" of String, parameter "function_name" of String,
+           parameter "version" of String, parameter "params" of unspecified
+           object, parameter "returned" of unspecified object, parameter
+           "error" of unspecified object, parameter "run_context" of type
+           "RunContext" (location = local | njsw job_id = '' | [njsw_job_id]
+           May want to add: AWE node ID, client group, total run time, etc)
+           -> structure: parameter "location" of String, parameter "job_id"
+           of String
         """
         # ctx is the context object
         # return variables are: results

@@ -14,27 +14,32 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * <p>Original spec-file type: RunBatchParams</p>
- * 
+ * <pre>
+ * runner = serial_local | parallel_local | parallel
+ * </pre>
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "tasks",
+    "runner",
     "concurrent_local_tasks",
     "concurrent_njsw_tasks",
-    "n_retry_failed_tasks"
+    "max_retries"
 })
 public class RunBatchParams {
 
     @JsonProperty("tasks")
     private List<Task> tasks;
+    @JsonProperty("runner")
+    private String runner;
     @JsonProperty("concurrent_local_tasks")
     private Long concurrentLocalTasks;
     @JsonProperty("concurrent_njsw_tasks")
     private Long concurrentNjswTasks;
-    @JsonProperty("n_retry_failed_tasks")
-    private Long nRetryFailedTasks;
+    @JsonProperty("max_retries")
+    private Long maxRetries;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("tasks")
@@ -49,6 +54,21 @@ public class RunBatchParams {
 
     public RunBatchParams withTasks(List<Task> tasks) {
         this.tasks = tasks;
+        return this;
+    }
+
+    @JsonProperty("runner")
+    public String getRunner() {
+        return runner;
+    }
+
+    @JsonProperty("runner")
+    public void setRunner(String runner) {
+        this.runner = runner;
+    }
+
+    public RunBatchParams withRunner(String runner) {
+        this.runner = runner;
         return this;
     }
 
@@ -82,18 +102,18 @@ public class RunBatchParams {
         return this;
     }
 
-    @JsonProperty("n_retry_failed_tasks")
-    public Long getNRetryFailedTasks() {
-        return nRetryFailedTasks;
+    @JsonProperty("max_retries")
+    public Long getMaxRetries() {
+        return maxRetries;
     }
 
-    @JsonProperty("n_retry_failed_tasks")
-    public void setNRetryFailedTasks(Long nRetryFailedTasks) {
-        this.nRetryFailedTasks = nRetryFailedTasks;
+    @JsonProperty("max_retries")
+    public void setMaxRetries(Long maxRetries) {
+        this.maxRetries = maxRetries;
     }
 
-    public RunBatchParams withNRetryFailedTasks(Long nRetryFailedTasks) {
-        this.nRetryFailedTasks = nRetryFailedTasks;
+    public RunBatchParams withMaxRetries(Long maxRetries) {
+        this.maxRetries = maxRetries;
         return this;
     }
 
@@ -109,7 +129,7 @@ public class RunBatchParams {
 
     @Override
     public String toString() {
-        return ((((((((((("RunBatchParams"+" [tasks=")+ tasks)+", concurrentLocalTasks=")+ concurrentLocalTasks)+", concurrentNjswTasks=")+ concurrentNjswTasks)+", nRetryFailedTasks=")+ nRetryFailedTasks)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((("RunBatchParams"+" [tasks=")+ tasks)+", runner=")+ runner)+", concurrentLocalTasks=")+ concurrentLocalTasks)+", concurrentNjswTasks=")+ concurrentNjswTasks)+", maxRetries=")+ maxRetries)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

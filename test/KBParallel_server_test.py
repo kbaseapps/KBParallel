@@ -164,7 +164,6 @@ class KBParallelTest(unittest.TestCase):
                   }
 
         results = self.getImpl().run_batch(self.getContext(), params)
-        print('HEREREAREAER')
         pprint(results)
 
 

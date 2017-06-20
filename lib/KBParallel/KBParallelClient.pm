@@ -179,16 +179,17 @@ $params is a KBParallel.RunBatchParams
 $results is a KBParallel.BatchResults
 RunBatchParams is a reference to a hash where the following keys are defined:
 	tasks has a value which is a reference to a list where each element is a KBParallel.Task
+	runner has a value which is a string
 	concurrent_local_tasks has a value which is an int
 	concurrent_njsw_tasks has a value which is an int
-	n_retry_failed_tasks has a value which is an int
+	max_retries has a value which is an int
 Task is a reference to a hash where the following keys are defined:
 	function has a value which is a KBParallel.Function
 	params has a value which is an UnspecifiedObject, which can hold any non-null object
 	run_local has a value which is a KBParallel.boolean
 Function is a reference to a hash where the following keys are defined:
-	name has a value which is a string
 	module_name has a value which is a string
+	function_name has a value which is a string
 	version has a value which is a string
 boolean is an int
 BatchResults is a reference to a hash where the following keys are defined:
@@ -213,16 +214,17 @@ $params is a KBParallel.RunBatchParams
 $results is a KBParallel.BatchResults
 RunBatchParams is a reference to a hash where the following keys are defined:
 	tasks has a value which is a reference to a list where each element is a KBParallel.Task
+	runner has a value which is a string
 	concurrent_local_tasks has a value which is an int
 	concurrent_njsw_tasks has a value which is an int
-	n_retry_failed_tasks has a value which is an int
+	max_retries has a value which is an int
 Task is a reference to a hash where the following keys are defined:
 	function has a value which is a KBParallel.Function
 	params has a value which is an UnspecifiedObject, which can hold any non-null object
 	run_local has a value which is a KBParallel.boolean
 Function is a reference to a hash where the following keys are defined:
-	name has a value which is a string
 	module_name has a value which is a string
+	function_name has a value which is a string
 	version has a value which is a string
 boolean is an int
 BatchResults is a reference to a hash where the following keys are defined:
@@ -812,8 +814,8 @@ an int
 
 <pre>
 a reference to a hash where the following keys are defined:
-name has a value which is a string
 module_name has a value which is a string
+function_name has a value which is a string
 version has a value which is a string
 
 </pre>
@@ -823,8 +825,8 @@ version has a value which is a string
 =begin text
 
 a reference to a hash where the following keys are defined:
-name has a value which is a string
 module_name has a value which is a string
+function_name has a value which is a string
 version has a value which is a string
 
 
@@ -982,6 +984,11 @@ results has a value which is a reference to a list where each element is a KBPar
 
 
 
+=item Description
+
+runner = serial_local | parallel_local | parallel
+
+
 =item Definition
 
 =begin html
@@ -989,9 +996,10 @@ results has a value which is a reference to a list where each element is a KBPar
 <pre>
 a reference to a hash where the following keys are defined:
 tasks has a value which is a reference to a list where each element is a KBParallel.Task
+runner has a value which is a string
 concurrent_local_tasks has a value which is an int
 concurrent_njsw_tasks has a value which is an int
-n_retry_failed_tasks has a value which is an int
+max_retries has a value which is an int
 
 </pre>
 
@@ -1001,9 +1009,10 @@ n_retry_failed_tasks has a value which is an int
 
 a reference to a hash where the following keys are defined:
 tasks has a value which is a reference to a list where each element is a KBParallel.Task
+runner has a value which is a string
 concurrent_local_tasks has a value which is an int
 concurrent_njsw_tasks has a value which is an int
-n_retry_failed_tasks has a value which is an int
+max_retries has a value which is an int
 
 
 =end text
