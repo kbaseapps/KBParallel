@@ -18,7 +18,7 @@ from KBParallel.KBParallelImpl import KBParallel
 from KBParallel.KBParallelServer import MethodContext
 
 from KBParallel.Task import Task
-from KBParallel.SerialLocalRunner import SerialLocalRunner
+from KBParallel.Runners import ParallelRunner, ParallelLocalRunner, SerialLocalRunner
 
 
 class KBParallelTest(unittest.TestCase):
@@ -48,6 +48,7 @@ class KBParallelTest(unittest.TestCase):
         for nameval in config.items('KBParallel'):
             cls.cfg[nameval[0]] = nameval[1]
 
+        cls.execution_engine_url = cls.cfg['njs-wrapper-url']
         cls.callback_url = os.environ['SDK_CALLBACK_URL']
         cls.wsURL = cls.cfg['workspace-url']
         cls.wsClient = workspaceService(cls.wsURL, token=cls.token)
@@ -92,7 +93,41 @@ class KBParallelTest(unittest.TestCase):
         self.assertEqual(result_package['result_package']['result'][0]['new_number'], 500)
 
 
-    def test_serial_runner(self):
+    def test_serial_local_runner(self):
+
+        tasks = []
+        tasks.append(Task('KBParallelTestModule', 'do_something', 'dev', {'number': 1}, self.token))
+        tasks.append(Task('KBParallelTestModule', 'do_something', 'dev', {'number': 2}, self.token))
+        tasks.append(Task('KBParallelTestModule', 'do_something', 'dev', {'number': 3}, self.token))
+
+        slr = SerialLocalRunner(tasks, 1, self.callback_url)
+        results = slr.run()
+
+        self.assertEqual(results[0]['result_package']['result'][0]['new_number'], 100)
+        self.assertEqual(results[1]['result_package']['result'][0]['new_number'], 200)
+        self.assertEqual(results[2]['result_package']['result'][0]['new_number'], 300)
+
+
+    def test_parallel_local_runner(self):
+
+        tasks = []
+        tasks.append(Task('KBParallelTestModule', 'do_something', 'dev', {'number': 1}, self.token))
+        tasks.append(Task('KBParallelTestModule', 'do_something', 'dev', {'number': 2}, self.token))
+        tasks.append(Task('KBParallelTestModule', 'do_something', 'dev', {'number': 3}, self.token))
+        tasks.append(Task('KBParallelTestModule', 'do_something', 'dev', {'number': 4}, self.token))
+        tasks.append(Task('KBParallelTestModule', 'do_something', 'dev', {'number': 5}, self.token))
+
+        plr = ParallelLocalRunner(tasks, 2, 1, 60, self.callback_url)
+        results = plr.run()
+
+        self.assertEqual(results[0]['result_package']['result'][0]['new_number'], 100)
+        self.assertEqual(results[1]['result_package']['result'][0]['new_number'], 200)
+        self.assertEqual(results[2]['result_package']['result'][0]['new_number'], 300)
+        self.assertEqual(results[3]['result_package']['result'][0]['new_number'], 400)
+        self.assertEqual(results[4]['result_package']['result'][0]['new_number'], 500)
+
+
+    def test_parallel_local_runner(self):
 
         tasks = []
         tasks.append(Task('KBParallelTestModule', 'do_something', 'dev', {'number': 1}, self.token))
@@ -100,25 +135,41 @@ class KBParallelTest(unittest.TestCase):
         tasks.append(Task('KBParallelTestModule', 'do_something', 'dev', {'number': 3}, self.token))
         tasks.append(Task('KBParallelTestModule', 'do_something', 'dev', {'number': 4}, self.token))
 
-        slr = SerialLocalRunner(tasks, 1, self.callback_url)
-        results = slr.run()
+        # Note: this test submits to the test endpoint NJS wrapper, so really runs things remotely
+        n_local_tasks = 1
+        n_njsw_tasks = 2
+        plr = ParallelRunner(tasks, 2, n_local_tasks, n_njsw_tasks, 60, self.callback_url, self.execution_engine_url)
+        results = plr.run()
+
+        self.assertEqual(results[0]['result_package']['result'][0]['new_number'], 100)
+        self.assertEqual(results[1]['result_package']['result'][0]['new_number'], 200)
+        self.assertEqual(results[2]['result_package']['result'][0]['new_number'], 300)
+        self.assertEqual(results[3]['result_package']['result'][0]['new_number'], 400)
 
 
+    def test_batch_runner_interface(self):
 
-    # NOTE: According to Python unittest naming rules test method names should start from 'test'. # noqa
-    #def test_your_method(self):
-        # Prepare test objects in workspace if needed using
-        # self.getWsClient().save_objects({'workspace': self.getWsName(),
-        #                                  'objects': []})
-        #
-        # Run your method by
-        # ret = self.getImpl().your_method(self.getContext(), parameters...)
-        #
-        # Check returned data with
-        # self.assertEqual(ret[...], ...) or other unittest methods
-        #pass
+        def build_task_spec(number):
+            return {'module_name': 'KBParallelTestModule',
+                    'function_name': 'do_something',
+                    'version': 'dev',
+                    'parameters': {'number': number}}
+
+
+        params = {'tasks': [build_task_spec(1),
+                            build_task_spec(2),
+                            build_task_spec(3)
+                            ],
+                  'runner': 'local_parallel'
+                  }
+
+        results = self.getImpl().run_batch(self.getContext(), params)
+        print('HEREREAREAER')
+        pprint(results)
+
 
     def test_KBParallel(self):
+        # skip this test for now
         return
         # Prepare test objects in workspace if needed using
         # self.getWsClient().save_objects({'workspace': self.getWsName(),
@@ -139,8 +190,4 @@ class KBParallelTest(unittest.TestCase):
         res= self.getImpl().run( self.getContext(), input_params )
         #res= self.getImpl().run_narrative( self.getContext(), in_params )
         pprint( res )
-
-        #
-        # Check returned data with
-        # self.assertEqual(ret[...], ...) or other unittest methods
 

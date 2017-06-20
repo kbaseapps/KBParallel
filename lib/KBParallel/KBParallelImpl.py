@@ -14,6 +14,7 @@ import json
 import logging
 from biokbase.njs_wrapper.client import NarrativeJobService as NJS
 
+from KBParallel.BatchRunner import BatchRunner
 
 def notyet( msg ):
     return( msg + " is not implemented yet" )
@@ -112,6 +113,9 @@ class KBParallel:
         # ctx is the context object
         # return variables are: results
         #BEGIN run_batch
+        br = BatchRunner(self.callbackURL, self.config, ctx['token'])
+        result_packages = br.run(params)
+        results = {'results': result_packages}
         #END run_batch
 
         # At some point might do deeper type checking...

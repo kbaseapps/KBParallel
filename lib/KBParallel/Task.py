@@ -1,6 +1,21 @@
 from KBParallel.baseclient import BaseClient
 
 
+class TaskProvider(object):
+
+    def __init__(self, tasks):
+        self.tasks = tasks
+        self.next_task_index = 0
+
+    def claim_next_task(self):
+        if self.next_task_index < len(self.tasks):
+            next_task = self.tasks[self.next_task_index]
+            self.next_task_index += 1
+            return next_task
+        else:
+            return None
+
+
 class Task(object):
 
     def __init__(self, module_name, function_name, version, parameters, token):
@@ -32,11 +47,19 @@ class Task(object):
                 callback_server_url - runs locally
                 njsw_url - submits to run on a cluster
         '''
+        if self._job_id:
+            if self._final_job_state:
+                self._job_id = None
+                self._final_job_state = None
+                self.run_location = None
+            else:
+                raise ValueError('Cannot start task- already running and has not completed')
         self.execution_engine = BaseClient(runner_url, token=self.token)
         self._job_id = self.execution_engine._submit_job(self.module_name + '.' + self.function_name,
                                                          self.parameters,
                                                          service_ver=self.version)
         self.run_location = run_location
+        print('RUNNER STARTING TASK: ' + str(self._job_id) + ' running on ' + self.run_location)
         return self._job_id
 
 

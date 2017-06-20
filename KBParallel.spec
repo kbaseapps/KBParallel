@@ -50,7 +50,7 @@ module KBParallel {
 
 
     /* 
-        runner = serial_local | parallel_local | njsw
+        runner = serial_local | parallel_local | parallel
     */
     typedef structure {
         list <Task> tasks;
@@ -59,7 +59,8 @@ module KBParallel {
 
         int concurrent_local_tasks;
         int concurrent_njsw_tasks;
-        int n_retry_failed_tasks;
+        
+        int max_retries;
     } RunBatchParams;
 
 
