@@ -53,4 +53,3 @@ class SerialLocalRunner(object):
             result_packages.append(task.get_task_result_package())
 
         return result_packages
-

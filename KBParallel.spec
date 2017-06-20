@@ -49,9 +49,14 @@ module KBParallel {
     } BatchResults;
 
 
-    /* To run local */
+    /* 
+        runner = serial_local | parallel_local | njsw
+    */
     typedef structure {
         list <Task> tasks;
+
+        string runner;
+
         int concurrent_local_tasks;
         int concurrent_njsw_tasks;
         int n_retry_failed_tasks;
