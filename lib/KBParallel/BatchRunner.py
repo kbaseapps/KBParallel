@@ -33,9 +33,13 @@ class BatchRunner(object):
         if validated_params['runner'] == 'parallel':
             # tasks, max_retries, n_concurrent_tasks, total_checks_per_min, callback_url
             total_checks_per_min = 30
-            plr = ParallelRunner(tasks, max_retries, validated_params['concurrent_local_tasks'],
-                                 validated_params['concurrent_local_tasks'], total_checks_per_min,
-                                 total_checks_per_min, self.callback_url, self.execution_engine_url)
+            plr = ParallelRunner(tasks,
+                                 max_retries,
+                                 validated_params['concurrent_local_tasks'],
+                                 validated_params['concurrent_njsw_tasks'],
+                                 total_checks_per_min,
+                                 self.callback_url,
+                                 self.execution_engine_url)
             return plr.run()
 
         # this path should not be reachable
