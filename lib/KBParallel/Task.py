@@ -142,8 +142,8 @@ class Task(object):
                 job_state = self.execution_engine._check_job(self.module_name, self._job_id)
                 break
             except ConnectionError as e:
-                print('WARNING: ConnectionError calling _check_job(job_id=' + self._job_id + ') waiting ' +
-                      self.RETRY_WAIT_TIME + ' and retrying')
+                print('WARNING: ConnectionError calling _check_job(job_id=' + str(self._job_id) + ') waiting ' +
+                      str(self.RETRY_WAIT_TIME) + ' and retrying')
                 pprint(e)
             time.sleep(self.RETRY_WAIT_TIME)
 
