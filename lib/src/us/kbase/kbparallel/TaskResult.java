@@ -30,7 +30,9 @@ public class TaskResult {
 
     /**
      * <p>Original spec-file type: Function</p>
-     * 
+     * <pre>
+     * Specifies a specific KBase module function to run
+     * </pre>
      * 
      */
     @JsonProperty("function")
@@ -56,7 +58,9 @@ public class TaskResult {
 
     /**
      * <p>Original spec-file type: Function</p>
-     * 
+     * <pre>
+     * Specifies a specific KBase module function to run
+     * </pre>
      * 
      */
     @JsonProperty("function")
@@ -66,7 +70,9 @@ public class TaskResult {
 
     /**
      * <p>Original spec-file type: Function</p>
-     * 
+     * <pre>
+     * Specifies a specific KBase module function to run
+     * </pre>
      * 
      */
     @JsonProperty("function")

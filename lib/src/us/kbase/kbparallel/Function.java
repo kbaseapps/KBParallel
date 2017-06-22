@@ -13,7 +13,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * <p>Original spec-file type: Function</p>
- * 
+ * <pre>
+ * Specifies a specific KBase module function to run
+ * </pre>
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)

@@ -337,22 +337,6 @@ class Application(object):
                              name='KBParallel.run_batch',
                              types=[dict])
         self.method_authentication['KBParallel.run_batch'] = 'required'  # noqa
-        self.rpc_service.add(impl_KBParallel.run,
-                             name='KBParallel.run',
-                             types=[dict])
-        self.method_authentication['KBParallel.run'] = 'required'  # noqa
-        self.rpc_service.add(impl_KBParallel.job_status,
-                             name='KBParallel.job_status',
-                             types=[dict])
-        self.method_authentication['KBParallel.job_status'] = 'required'  # noqa
-        self.rpc_service.add(impl_KBParallel.cancel_run,
-                             name='KBParallel.cancel_run',
-                             types=[dict])
-        self.method_authentication['KBParallel.cancel_run'] = 'required'  # noqa
-        self.rpc_service.add(impl_KBParallel.getlog,
-                             name='KBParallel.getlog',
-                             types=[dict])
-        self.method_authentication['KBParallel.getlog'] = 'required'  # noqa
         self.rpc_service.add(impl_KBParallel.status,
                              name='KBParallel.status',
                              types=[dict])

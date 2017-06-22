@@ -14,7 +14,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * <p>Original spec-file type: BatchResults</p>
- * 
+ * <pre>
+ * The list of results will be in the same order as the input list of tasks.
+ * </pre>
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
