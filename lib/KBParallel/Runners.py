@@ -1,4 +1,6 @@
 import time
+import sys
+from datetime import datetime
 
 from KBParallel.Task import TaskProvider
 from KBParallel.ParallelTaskTracker import ParallelTaskTracker
@@ -35,12 +37,12 @@ class ParallelRunner(object):
             if len(completed_local) > 0 or len(completed_remote) > 0:
                 n_local_completed += len(completed_local)
                 n_remote_completed += len(completed_remote)
-                print('RUNNER STATUS UPDATE: completed ' + str(n_local_completed + n_remote_completed) + ' of ' +
-                      str(len(self.tasks)) + ' tasks')
+                print(str(datetime.now()) + ' - RUNNER STATUS UPDATE: completed ' +
+                      str(n_local_completed + n_remote_completed) + ' of ' + str(len(self.tasks)) + ' tasks')
+            sys.stdout.flush()
 
-
-        print('RUNNER STATUS UPDATE: completed ' + str(n_local_completed + n_remote_completed) + ' of ' +
-              str(len(self.tasks)) + ' tasks')
+        print(str(datetime.now()) + ' - RUNNER STATUS UPDATE: completed ' +
+              str(n_local_completed + n_remote_completed) + ' of ' + str(len(self.tasks)) + ' tasks')
         result_packages = []
         for t in self.tasks:
             result_packages.append(t.get_task_result_package())

@@ -1,5 +1,8 @@
 import time
+
+from datetime import datetime
 from requests.exceptions import ConnectionError
+
 from pprint import pprint
 
 from KBParallel.baseclient import BaseClient
@@ -42,6 +45,8 @@ class Task(object):
         self.execution_engine = None
         self._job_id = None
 
+        self.last_state = None
+
         self._final_job_state = None
         self.run_location = None
 
@@ -66,7 +71,7 @@ class Task(object):
                                                          self.parameters,
                                                          service_ver=self.version)
         self.run_location = run_location
-        print('RUNNER STARTING TASK: ' + str(self._job_id) + ' running on ' + self.run_location)
+        print(str(datetime.now()) + ' - RUNNER SUBMITTING TASK: ' + str(self._job_id) + ' on ' + self.run_location)
         return self._job_id
 
 
@@ -145,6 +150,12 @@ class Task(object):
         # job is finished, so remember that
         if job_state['finished'] == 1:
             self._final_job_state = job_state
+
+        if 'job_state' in job_state:
+            if self.last_state != job_state['job_state']:
+                self.last_state = job_state['job_state']
+                print(str(datetime.now()) + ' - RUNNER TASK: ' + str(self._job_id) + ' on ' + self.run_location +
+                      ' now on job state: ' + self.last_state)
 
         return job_state
 
