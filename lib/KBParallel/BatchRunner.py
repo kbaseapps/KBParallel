@@ -75,11 +75,11 @@ class BatchRunner(object):
         validated_params['runner'] = parameters['runner']
 
         # get number of concurrent local tasks- keep in a range between 1 and 20 for now
-        validated_params['concurrent_local_tasks'] = 2
+        validated_params['concurrent_local_tasks'] = 1
         if 'concurrent_local_tasks' in parameters:
             clt = int(parameters['concurrent_local_tasks'])
-            if clt < 1:
-                clt = 1
+            if clt < 0:
+                clt = 0
             if clt > 20:
                 clt = 20
             validated_params['concurrent_local_tasks'] = clt
@@ -87,8 +87,8 @@ class BatchRunner(object):
         validated_params['concurrent_njsw_tasks'] = 0
         if 'concurrent_njsw_tasks' in parameters:
             cnjswt = int(parameters['concurrent_njsw_tasks'])
-            if cnjswt < 1:
-                cnjswt = 1
+            if cnjswt < 0:
+                cnjswt = 0
             if cnjswt > 50:
                 cnjswt = 50
             validated_params['concurrent_njsw_tasks'] = cnjswt
