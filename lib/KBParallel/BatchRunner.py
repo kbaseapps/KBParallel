@@ -8,6 +8,7 @@ class BatchRunner(object):
     def __init__(self, callback_url, cfg, token):
         self.callback_url = callback_url
         self.cfg = cfg
+        self.execution_engine_url = self.cfg['njs-wrapper-url']
         self.token = token
 
 
@@ -16,7 +17,7 @@ class BatchRunner(object):
         validated_params = self.validate_params(parameters)
         tasks = self.build_tasks(validated_params['tasks'])
 
-        max_retries = 1
+        max_retries = validated_params['max_retries']
 
         if validated_params['runner'] == 'local_serial':
             slr = SerialLocalRunner(tasks, max_retries, self.callback_url)
@@ -34,7 +35,7 @@ class BatchRunner(object):
             total_checks_per_min = 30
             plr = ParallelRunner(tasks, max_retries, validated_params['concurrent_local_tasks'],
                                  validated_params['concurrent_local_tasks'], total_checks_per_min,
-                                 total_checks_per_min, self.callback_url)
+                                 total_checks_per_min, self.callback_url, self.execution_engine_url)
             return plr.run()
 
         # this path should not be reachable
@@ -87,5 +88,14 @@ class BatchRunner(object):
             if cnjswt > 50:
                 cnjswt = 50
             validated_params['concurrent_njsw_tasks'] = cnjswt
+
+        validated_params['max_retries'] = 1
+        if 'max_retries' in parameters and parameters['concurrent_njsw_tasks'] is not None:
+            mr = int(parameters['concurrent_njsw_tasks'])
+            if mr < 1:
+                mr = 1
+            if mr > 5:
+                mr = 5
+            validated_params['max_retries'] = mr
 
         return validated_params
