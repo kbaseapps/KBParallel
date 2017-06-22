@@ -1,5 +1,5 @@
 import time
-from requests.excpetions import ConnectionError
+from requests.exceptions import ConnectionError
 from pprint import pprint
 
 from KBParallel.baseclient import BaseClient
