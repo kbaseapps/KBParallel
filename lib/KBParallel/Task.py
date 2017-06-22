@@ -1,11 +1,17 @@
+import time
+from requests.excpetions import ConnectionError
+from pprint import pprint
+
 from KBParallel.baseclient import BaseClient
 
 
 class TaskProvider(object):
 
-    def __init__(self, tasks):
+    def __init__(self, tasks, n_connection_retries=5, retry_wait_time=5):
         self.tasks = tasks
         self.next_task_index = 0
+        self.N_CONNECTION_RETRIES = n_connection_retries
+        self.RETRY_WAIT_TIME = retry_wait_time
 
     def claim_next_task(self):
         if self.next_task_index < len(self.tasks):
@@ -125,7 +131,15 @@ class Task(object):
             return self._final_job_state
 
         # otherwise we need to call the execution engine
-        job_state = self.execution_engine._check_job(self.module_name, self._job_id)
+        for k in range(0, self.N_CONNECTION_RETRIES):
+            try:
+                job_state = self.execution_engine._check_job(self.module_name, self._job_id)
+                break
+            except ConnectionError as e:
+                print('WARNING: ConnectionError calling _check_job(job_id=' + self._job_id + ') waiting ' +
+                      self.RETRY_WAIT_TIME + ' and retrying')
+                pprint(e)
+            time.sleep(self.RETRY_WAIT_TIME)
 
         # job is finished, so remember that
         if job_state['finished'] == 1:
