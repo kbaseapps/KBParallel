@@ -7,11 +7,9 @@ from KBParallel.baseclient import BaseClient
 
 class TaskProvider(object):
 
-    def __init__(self, tasks, n_connection_retries=5, retry_wait_time=5):
+    def __init__(self, tasks):
         self.tasks = tasks
         self.next_task_index = 0
-        self.N_CONNECTION_RETRIES = n_connection_retries
-        self.RETRY_WAIT_TIME = retry_wait_time
 
     def claim_next_task(self):
         if self.next_task_index < len(self.tasks):
@@ -24,11 +22,11 @@ class TaskProvider(object):
 
 class Task(object):
 
-    def __init__(self, module_name, function_name, version, parameters, token):
+    def __init__(self, module_name, function_name, version, parameters, token,
+                 n_connection_retries=5, retry_wait_time=5):
 
         self.module_name = module_name
         self.function_name = function_name
-
 
         self.version = 'release'
         if version:
@@ -46,6 +44,9 @@ class Task(object):
 
         self._final_job_state = None
         self.run_location = None
+
+        self.N_CONNECTION_RETRIES = n_connection_retries
+        self.RETRY_WAIT_TIME = retry_wait_time
 
 
     def start(self, runner_url, run_location):
