@@ -46,9 +46,9 @@ class KBParallel:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "0.0.8"
+    VERSION = "0.0.9"
     GIT_URL = "git@github.com:kbaseapps/KBParallel"
-    GIT_COMMIT_HASH = "cc8be3deafe57c33f6a0605ea88c308092af1dac"
+    GIT_COMMIT_HASH = "8239ed9f653935e2ad83f0f2b363a321237ba135"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -91,17 +91,28 @@ class KBParallel:
     def run_batch(self, ctx, params):
         """
         :param params: instance of type "RunBatchParams" (runner =
-           serial_local | parallel_local | parallel) -> structure: parameter
-           "tasks" of list of type "Task" (Specifies a task to run. 
-           Parameters is an arbitrary data object passed to the function.  If
-           it is a list, the params will be interpreted as) -> structure:
-           parameter "function" of type "Function" (Specifies a specific
-           KBase module function to run) -> structure: parameter
-           "module_name" of String, parameter "function_name" of String,
-           parameter "version" of String, parameter "params" of unspecified
-           object, parameter "runner" of String, parameter
-           "concurrent_local_tasks" of Long, parameter
-           "concurrent_njsw_tasks" of Long, parameter "max_retries" of Long
+           serial_local | parallel_local | parallel serial_local will run
+           tasks on the node in serial, ignoring the concurrent task limits
+           parallel_local will run multiple tasks on the node in parallel,
+           and will ignore the njsw_task parameter. Unless you know where
+           your job will run, you probably don't want to set this higher than
+           2 parallel will look at both the local task and njsw task limits
+           and operate appropriately. Therefore, you could always just select
+           this option and tweak the task limits to get either serial_local
+           or parallel_local behavior. TODO: wsid - if defined, the workspace
+           id or name (service will handle either string or int) on which to
+           attach the job. Anyone with permissions to that WS will be able to
+           view job status for this run.) -> structure: parameter "tasks" of
+           list of type "Task" (Specifies a task to run.  Parameters is an
+           arbitrary data object passed to the function.  If it is a list,
+           the params will be interpreted as) -> structure: parameter
+           "function" of type "Function" (Specifies a specific KBase module
+           function to run) -> structure: parameter "module_name" of String,
+           parameter "function_name" of String, parameter "version" of
+           String, parameter "params" of unspecified object, parameter
+           "runner" of String, parameter "concurrent_local_tasks" of Long,
+           parameter "concurrent_njsw_tasks" of Long, parameter "max_retries"
+           of Long
         :returns: instance of type "BatchResults" (The list of results will
            be in the same order as the input list of tasks.) -> structure:
            parameter "results" of list of type "TaskResult" -> structure:

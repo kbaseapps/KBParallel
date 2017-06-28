@@ -557,6 +557,20 @@ results has a value which is a reference to a list where each element is a KBPar
 =item Description
 
 runner = serial_local | parallel_local | parallel
+    serial_local will run tasks on the node in serial, ignoring the concurrent
+        task limits
+    parallel_local will run multiple tasks on the node in parallel, and will
+        ignore the njsw_task parameter. Unless you know where your job will
+        run, you probably don't want to set this higher than 2
+    parallel will look at both the local task and njsw task limits and operate
+        appropriately. Therefore, you could always just select this option and
+        tweak the task limits to get either serial_local or parallel_local
+        behavior.
+
+TODO:
+wsid - if defined, the workspace id or name (service will handle either string or
+       int) on which to attach the job. Anyone with permissions to that WS will
+       be able to view job status for this run.
 
 
 =item Definition
