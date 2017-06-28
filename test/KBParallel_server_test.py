@@ -79,7 +79,6 @@ class KBParallelTest(unittest.TestCase):
         return self.__class__.ctx
 
 
-
     def test_task(self):
         t = Task('KBParallelTestModule', 'do_something', 'dev', {'number': 5}, self.token)
         t.start(self.callback_url, 'local')
@@ -87,14 +86,37 @@ class KBParallelTest(unittest.TestCase):
         while not t.is_done():
             time.sleep(0.2)
 
-        self.assertTrue(t.success(), True)
+        self.assertTrue(t.success())
         result_package = t.get_task_result_package()
-        pprint(result_package)
         self.assertEqual(result_package['result_package']['result'][0]['new_number'], 500)
 
 
-    def test_serial_local_runner(self):
+    def test_local_task_failure(self):
+        t = Task('KBParallelTestModule', 'do_something', 'dev', {'throw_error': 1}, self.token)
+        t.start(self.callback_url, 'local')
 
+        while not t.is_done():
+            time.sleep(0.2)
+        self.assertFalse(t.success())
+        result_package = t.get_task_result_package()
+        self.assertEqual(result_package['result_package']['result'], None)
+        self.assertTrue('doing as you wish' in result_package['result_package']['error'])
+
+
+    def test_njsw_task_failure(self):
+        t = Task('KBParallelTestModule', 'do_something', 'dev', {'throw_error': 1}, self.token)
+        t.start(self.execution_engine_url, 'njsw')
+
+        while not t.is_done():
+            time.sleep(0.2)
+
+        self.assertFalse(t.success())
+        result_package = t.get_task_result_package()
+        self.assertEqual(result_package['result_package']['result'], None)
+        self.assertTrue('doing as you wish' in result_package['result_package']['error'])
+
+
+    def test_serial_local_runner(self):
         tasks = []
         tasks.append(Task('KBParallelTestModule', 'do_something', 'dev', {'number': 1}, self.token))
         tasks.append(Task('KBParallelTestModule', 'do_something', 'dev', {'number': 2}, self.token))
@@ -109,7 +131,6 @@ class KBParallelTest(unittest.TestCase):
 
 
     def test_parallel_local_runner(self):
-
         tasks = []
         tasks.append(Task('KBParallelTestModule', 'do_something', 'dev', {'number': 1}, self.token))
         tasks.append(Task('KBParallelTestModule', 'do_something', 'dev', {'number': 2}, self.token))
@@ -128,7 +149,6 @@ class KBParallelTest(unittest.TestCase):
 
 
     def test_parallel_local_runner(self):
-
         tasks = []
         tasks.append(Task('KBParallelTestModule', 'do_something', 'dev', {'number': 1}, self.token))
         tasks.append(Task('KBParallelTestModule', 'do_something', 'dev', {'number': 2}, self.token))
@@ -165,28 +185,3 @@ class KBParallelTest(unittest.TestCase):
 
         results = self.getImpl().run_batch(self.getContext(), params)
         pprint(results)
-
-
-    def test_KBParallel(self):
-        # skip this test for now
-        return
-        # Prepare test objects in workspace if needed using
-        # self.getWsClient().save_objects({'workspace': self.getWsName(),
-        #                                  'objects': []})
-        #
-        # Run your method by
-        # ret = self.getImpl().your_method(self.getContext(), parameters...)
-        #ret = self.getImpl().manyHellos( self.getContext(), input_params )
-        print( "in test_KBParallel()")
-        input_params = { 'method': {'module_name': 'ManyHellos',
-                                    'method_name': 'manyHellos',
-                                    'service_ver': 'dev'},
-                         'is_local': 1,
-                         'global_params': {'num_jobs' : 3, 
-                                           'msg': "Hello_",
-                                           'workspace': self.getWsName()}
-                       }
-        res= self.getImpl().run( self.getContext(), input_params )
-        #res= self.getImpl().run_narrative( self.getContext(), in_params )
-        pprint( res )
-

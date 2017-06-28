@@ -6,6 +6,7 @@ from requests.exceptions import ConnectionError
 from pprint import pprint
 
 from KBParallel.baseclient import BaseClient
+from KBParallel.baseclient import ServerError
 
 
 class TaskProvider(object):
@@ -87,7 +88,7 @@ class Task(object):
         ''' returns True if finished, no errors were reported, and result is defined.  False otherwise '''
         self.check_job_state()
         if self._final_job_state:
-            if 'error' in self._final_job_state and self._final_job_state['errror']:
+            if 'error' in self._final_job_state and self._final_job_state['error']:
                 return False
             if 'result' in self._final_job_state and self._final_job_state['result']:
                 return True
@@ -137,15 +138,20 @@ class Task(object):
             return self._final_job_state
 
         # otherwise we need to call the execution engine
-        for k in range(0, self.N_CONNECTION_RETRIES):
-            try:
-                job_state = self.execution_engine._check_job(self.module_name, self._job_id)
-                break
-            except ConnectionError as e:
-                print('WARNING: ConnectionError calling _check_job(job_id=' + str(self._job_id) + ') waiting ' +
-                      str(self.RETRY_WAIT_TIME) + ' and retrying')
-                pprint(e)
-            time.sleep(self.RETRY_WAIT_TIME)
+        try:
+            for k in range(0, self.N_CONNECTION_RETRIES):
+                try:
+                    job_state = self.execution_engine._check_job(self.module_name, self._job_id)
+                    break
+                except ConnectionError as e:
+                    print('WARNING: ConnectionError calling _check_job(job_id=' + str(self._job_id) + ') waiting ' +
+                          str(self.RETRY_WAIT_TIME) + ' and retrying')
+                    print('Error was: ' + str(e))
+                time.sleep(self.RETRY_WAIT_TIME)
+        except ServerError as server_error:
+            # TODO: would be better to use the njsw or callback server client directly - right now
+            # the baseclient emulates calling the module directly, so throws an error on failure
+            job_state = {'finished': 1, 'job_state': 'suspend', 'error': str(server_error)}
 
         # job is finished, so remember that
         if job_state['finished'] == 1:
