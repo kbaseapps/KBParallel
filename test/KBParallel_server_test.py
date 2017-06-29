@@ -148,7 +148,7 @@ class KBParallelTest(unittest.TestCase):
         self.assertEqual(results[4]['result_package']['result'][0]['new_number'], 500)
 
 
-    def test_parallel_local_runner(self):
+    def test_parallel_runner(self):
         tasks = []
         tasks.append(Task('KBParallelTestModule', 'do_something', 'dev', {'number': 1}, self.token))
         tasks.append(Task('KBParallelTestModule', 'do_something', 'dev', {'number': 2}, self.token))
