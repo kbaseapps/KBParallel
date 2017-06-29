@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import us.kbase.common.service.UObject;
 
 
 /**
@@ -20,146 +19,59 @@ import us.kbase.common.service.UObject;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
-    "function",
-    "params",
-    "returned",
-    "error",
-    "run_context"
+    "is_error",
+    "result_package"
 })
 public class TaskResult {
 
+    @JsonProperty("is_error")
+    private Long isError;
     /**
-     * <p>Original spec-file type: Function</p>
-     * <pre>
-     * Specifies a specific KBase module function to run
-     * </pre>
+     * <p>Original spec-file type: ResultPackage</p>
+     * 
      * 
      */
-    @JsonProperty("function")
-    private Function function;
-    @JsonProperty("params")
-    private UObject params;
-    @JsonProperty("returned")
-    private UObject returned;
-    @JsonProperty("error")
-    private UObject error;
-    /**
-     * <p>Original spec-file type: RunContext</p>
-     * <pre>
-     * location = local | njsw
-     * job_id = '' | [njsw_job_id]
-     * May want to add: AWE node ID, client group, total run time, etc
-     * </pre>
-     * 
-     */
-    @JsonProperty("run_context")
-    private RunContext runContext;
+    @JsonProperty("result_package")
+    private ResultPackage resultPackage;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-    /**
-     * <p>Original spec-file type: Function</p>
-     * <pre>
-     * Specifies a specific KBase module function to run
-     * </pre>
-     * 
-     */
-    @JsonProperty("function")
-    public Function getFunction() {
-        return function;
+    @JsonProperty("is_error")
+    public Long getIsError() {
+        return isError;
     }
 
-    /**
-     * <p>Original spec-file type: Function</p>
-     * <pre>
-     * Specifies a specific KBase module function to run
-     * </pre>
-     * 
-     */
-    @JsonProperty("function")
-    public void setFunction(Function function) {
-        this.function = function;
+    @JsonProperty("is_error")
+    public void setIsError(Long isError) {
+        this.isError = isError;
     }
 
-    public TaskResult withFunction(Function function) {
-        this.function = function;
-        return this;
-    }
-
-    @JsonProperty("params")
-    public UObject getParams() {
-        return params;
-    }
-
-    @JsonProperty("params")
-    public void setParams(UObject params) {
-        this.params = params;
-    }
-
-    public TaskResult withParams(UObject params) {
-        this.params = params;
-        return this;
-    }
-
-    @JsonProperty("returned")
-    public UObject getReturned() {
-        return returned;
-    }
-
-    @JsonProperty("returned")
-    public void setReturned(UObject returned) {
-        this.returned = returned;
-    }
-
-    public TaskResult withReturned(UObject returned) {
-        this.returned = returned;
-        return this;
-    }
-
-    @JsonProperty("error")
-    public UObject getError() {
-        return error;
-    }
-
-    @JsonProperty("error")
-    public void setError(UObject error) {
-        this.error = error;
-    }
-
-    public TaskResult withError(UObject error) {
-        this.error = error;
+    public TaskResult withIsError(Long isError) {
+        this.isError = isError;
         return this;
     }
 
     /**
-     * <p>Original spec-file type: RunContext</p>
-     * <pre>
-     * location = local | njsw
-     * job_id = '' | [njsw_job_id]
-     * May want to add: AWE node ID, client group, total run time, etc
-     * </pre>
+     * <p>Original spec-file type: ResultPackage</p>
+     * 
      * 
      */
-    @JsonProperty("run_context")
-    public RunContext getRunContext() {
-        return runContext;
+    @JsonProperty("result_package")
+    public ResultPackage getResultPackage() {
+        return resultPackage;
     }
 
     /**
-     * <p>Original spec-file type: RunContext</p>
-     * <pre>
-     * location = local | njsw
-     * job_id = '' | [njsw_job_id]
-     * May want to add: AWE node ID, client group, total run time, etc
-     * </pre>
+     * <p>Original spec-file type: ResultPackage</p>
+     * 
      * 
      */
-    @JsonProperty("run_context")
-    public void setRunContext(RunContext runContext) {
-        this.runContext = runContext;
+    @JsonProperty("result_package")
+    public void setResultPackage(ResultPackage resultPackage) {
+        this.resultPackage = resultPackage;
     }
 
-    public TaskResult withRunContext(RunContext runContext) {
-        this.runContext = runContext;
+    public TaskResult withResultPackage(ResultPackage resultPackage) {
+        this.resultPackage = resultPackage;
         return this;
     }
 
@@ -175,7 +87,7 @@ public class TaskResult {
 
     @Override
     public String toString() {
-        return ((((((((((((("TaskResult"+" [function=")+ function)+", params=")+ params)+", returned=")+ returned)+", error=")+ error)+", runContext=")+ runContext)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((("TaskResult"+" [isError=")+ isError)+", resultPackage=")+ resultPackage)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

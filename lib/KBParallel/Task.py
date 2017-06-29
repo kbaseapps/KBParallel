@@ -123,8 +123,11 @@ class Task(object):
         if 'result' in self._final_job_state and self._final_job_state['result']:
             result_package['result'] = self._final_job_state['result']
 
+        is_error_flag = 0
+        if not self.success():
+            is_error_flag = 1
         result = {'result_package': result_package,
-                  'is_error': not self.success(),
+                  'is_error': is_error_flag,
                   'final_job_state': self._final_job_state}
         return result
 

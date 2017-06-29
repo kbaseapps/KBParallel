@@ -41,11 +41,14 @@ module KBParallel {
 
     typedef structure {
         Function function;
-        UnspecifiedObject params;
-        UnspecifiedObject returned;
+        UnspecifiedObject result;
         UnspecifiedObject error;
-
         RunContext run_context;
+    } ResultPackage;
+
+    typedef structure {
+        boolean is_error;
+        ResultPackage result_package;
     } TaskResult;
 
     /*

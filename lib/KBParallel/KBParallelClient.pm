@@ -137,9 +137,12 @@ Function is a reference to a hash where the following keys are defined:
 BatchResults is a reference to a hash where the following keys are defined:
 	results has a value which is a reference to a list where each element is a KBParallel.TaskResult
 TaskResult is a reference to a hash where the following keys are defined:
+	is_error has a value which is a KBParallel.boolean
+	result_package has a value which is a KBParallel.ResultPackage
+boolean is an int
+ResultPackage is a reference to a hash where the following keys are defined:
 	function has a value which is a KBParallel.Function
-	params has a value which is an UnspecifiedObject, which can hold any non-null object
-	returned has a value which is an UnspecifiedObject, which can hold any non-null object
+	result has a value which is an UnspecifiedObject, which can hold any non-null object
 	error has a value which is an UnspecifiedObject, which can hold any non-null object
 	run_context has a value which is a KBParallel.RunContext
 RunContext is a reference to a hash where the following keys are defined:
@@ -170,9 +173,12 @@ Function is a reference to a hash where the following keys are defined:
 BatchResults is a reference to a hash where the following keys are defined:
 	results has a value which is a reference to a list where each element is a KBParallel.TaskResult
 TaskResult is a reference to a hash where the following keys are defined:
+	is_error has a value which is a KBParallel.boolean
+	result_package has a value which is a KBParallel.ResultPackage
+boolean is an int
+ResultPackage is a reference to a hash where the following keys are defined:
 	function has a value which is a KBParallel.Function
-	params has a value which is an UnspecifiedObject, which can hold any non-null object
-	returned has a value which is an UnspecifiedObject, which can hold any non-null object
+	result has a value which is an UnspecifiedObject, which can hold any non-null object
 	error has a value which is an UnspecifiedObject, which can hold any non-null object
 	run_context has a value which is a KBParallel.RunContext
 RunContext is a reference to a hash where the following keys are defined:
@@ -475,7 +481,7 @@ job_id has a value which is a string
 
 
 
-=head2 TaskResult
+=head2 ResultPackage
 
 =over 4
 
@@ -488,8 +494,7 @@ job_id has a value which is a string
 <pre>
 a reference to a hash where the following keys are defined:
 function has a value which is a KBParallel.Function
-params has a value which is an UnspecifiedObject, which can hold any non-null object
-returned has a value which is an UnspecifiedObject, which can hold any non-null object
+result has a value which is an UnspecifiedObject, which can hold any non-null object
 error has a value which is an UnspecifiedObject, which can hold any non-null object
 run_context has a value which is a KBParallel.RunContext
 
@@ -501,10 +506,41 @@ run_context has a value which is a KBParallel.RunContext
 
 a reference to a hash where the following keys are defined:
 function has a value which is a KBParallel.Function
-params has a value which is an UnspecifiedObject, which can hold any non-null object
-returned has a value which is an UnspecifiedObject, which can hold any non-null object
+result has a value which is an UnspecifiedObject, which can hold any non-null object
 error has a value which is an UnspecifiedObject, which can hold any non-null object
 run_context has a value which is a KBParallel.RunContext
+
+
+=end text
+
+=back
+
+
+
+=head2 TaskResult
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+is_error has a value which is a KBParallel.boolean
+result_package has a value which is a KBParallel.ResultPackage
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+is_error has a value which is a KBParallel.boolean
+result_package has a value which is a KBParallel.ResultPackage
 
 
 =end text

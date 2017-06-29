@@ -24,9 +24,9 @@ class KBParallel:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "0.0.9"
+    VERSION = "0.1.0"
     GIT_URL = "git@github.com:kbaseapps/KBParallel"
-    GIT_COMMIT_HASH = "8239ed9f653935e2ad83f0f2b363a321237ba135"
+    GIT_COMMIT_HASH = "8d73c06dcb10600a7eed2696775d1e08505c3b49"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -81,16 +81,17 @@ class KBParallel:
         :returns: instance of type "BatchResults" (The list of results will
            be in the same order as the input list of tasks.) -> structure:
            parameter "results" of list of type "TaskResult" -> structure:
-           parameter "function" of type "Function" (Specifies a specific
-           KBase module function to run) -> structure: parameter
-           "module_name" of String, parameter "function_name" of String,
-           parameter "version" of String, parameter "params" of unspecified
-           object, parameter "returned" of unspecified object, parameter
-           "error" of unspecified object, parameter "run_context" of type
-           "RunContext" (location = local | njsw job_id = '' | [njsw_job_id]
-           May want to add: AWE node ID, client group, total run time, etc)
-           -> structure: parameter "location" of String, parameter "job_id"
-           of String
+           parameter "is_error" of type "boolean" (A boolean - 0 for false, 1
+           for true. @range (0, 1)), parameter "result_package" of type
+           "ResultPackage" -> structure: parameter "function" of type
+           "Function" (Specifies a specific KBase module function to run) ->
+           structure: parameter "module_name" of String, parameter
+           "function_name" of String, parameter "version" of String,
+           parameter "result" of unspecified object, parameter "error" of
+           unspecified object, parameter "run_context" of type "RunContext"
+           (location = local | njsw job_id = '' | [njsw_job_id] May want to
+           add: AWE node ID, client group, total run time, etc) -> structure:
+           parameter "location" of String, parameter "job_id" of String
         """
         # ctx is the context object
         # return variables are: results

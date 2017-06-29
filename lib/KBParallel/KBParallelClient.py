@@ -61,16 +61,17 @@ class KBParallel(object):
         :returns: instance of type "BatchResults" (The list of results will
            be in the same order as the input list of tasks.) -> structure:
            parameter "results" of list of type "TaskResult" -> structure:
-           parameter "function" of type "Function" (Specifies a specific
-           KBase module function to run) -> structure: parameter
-           "module_name" of String, parameter "function_name" of String,
-           parameter "version" of String, parameter "params" of unspecified
-           object, parameter "returned" of unspecified object, parameter
-           "error" of unspecified object, parameter "run_context" of type
-           "RunContext" (location = local | njsw job_id = '' | [njsw_job_id]
-           May want to add: AWE node ID, client group, total run time, etc)
-           -> structure: parameter "location" of String, parameter "job_id"
-           of String
+           parameter "is_error" of type "boolean" (A boolean - 0 for false, 1
+           for true. @range (0, 1)), parameter "result_package" of type
+           "ResultPackage" -> structure: parameter "function" of type
+           "Function" (Specifies a specific KBase module function to run) ->
+           structure: parameter "module_name" of String, parameter
+           "function_name" of String, parameter "version" of String,
+           parameter "result" of unspecified object, parameter "error" of
+           unspecified object, parameter "run_context" of type "RunContext"
+           (location = local | njsw job_id = '' | [njsw_job_id] May want to
+           add: AWE node ID, client group, total run time, etc) -> structure:
+           parameter "location" of String, parameter "job_id" of String
         """
         return self._client.call_method(
             'KBParallel.run_batch',
