@@ -183,5 +183,9 @@ class KBParallelTest(unittest.TestCase):
                   'runner': 'local_parallel'
                   }
 
-        results = self.getImpl().run_batch(self.getContext(), params)
-        pprint(results)
+        results = self.getImpl().run_batch(self.getContext(), params)[0]
+        self.assertIn('results', results)
+        self.assertEqual(len(results['results']), 3)
+        self.assertEqual(results['results'][0]['result_package']['result'][0]['new_number'], 100)
+        self.assertEqual(results['results'][1]['result_package']['result'][0]['new_number'], 200)
+        self.assertEqual(results['results'][2]['result_package']['result'][0]['new_number'], 300)

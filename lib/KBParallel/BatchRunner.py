@@ -74,8 +74,15 @@ class BatchRunner(object):
             raise ValueError('Unknown or unsupported runner type = ' + str(parameters['runner']))
         validated_params['runner'] = parameters['runner']
 
-        # get number of concurrent local tasks- keep in a range between 1 and 20 for now
+        # set default concurrent tasks based on runner type
         validated_params['concurrent_local_tasks'] = 1
+        validated_params['concurrent_njsw_tasks'] = 0
+        if parameters['runner'] == 'local_parallel':
+            validated_params['concurrent_local_tasks'] = 2
+        if parameters['runner'] == 'parallel':
+            validated_params['concurrent_njsw_tasks'] = 3
+
+        # get number of concurrent local tasks- keep in a range between 1 and 20 for now
         if 'concurrent_local_tasks' in parameters:
             clt = int(parameters['concurrent_local_tasks'])
             if clt < 0:
@@ -84,7 +91,7 @@ class BatchRunner(object):
                 clt = 20
             validated_params['concurrent_local_tasks'] = clt
 
-        validated_params['concurrent_njsw_tasks'] = 0
+        # get number of concurrent njsw tasks- keep in a range between 1 and 50 for now
         if 'concurrent_njsw_tasks' in parameters:
             cnjswt = int(parameters['concurrent_njsw_tasks'])
             if cnjswt < 0:
