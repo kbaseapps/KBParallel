@@ -101,8 +101,8 @@ class BatchRunner(object):
             validated_params['concurrent_njsw_tasks'] = cnjswt
 
         validated_params['max_retries'] = 1
-        if 'max_retries' in parameters and parameters['concurrent_njsw_tasks'] is not None:
-            mr = int(parameters['concurrent_njsw_tasks'])
+        if 'max_retries' in parameters and parameters['max_retries'] is not None:
+            mr = int(parameters['max_retries'])
             if mr < 1:
                 mr = 1
             if mr > 5:
