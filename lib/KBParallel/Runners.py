@@ -16,7 +16,7 @@ class ParallelRunner(object):
         self.execution_engine_url = execution_engine_url
         self.n_local_concurrent_tasks = n_local_concurrent_tasks
         self.n_remote_concurrent_tasks = n_remote_concurrent_tasks
-        self.update_time_delay = total_checks_per_min / 60
+        self.update_time_delay = float(60) / float(total_checks_per_min)
 
     def run(self):
         task_provider = TaskProvider(self.tasks)
@@ -31,8 +31,8 @@ class ParallelRunner(object):
         n_local_completed = 0
         n_remote_completed = 0
         while local_task_tracker.n_running_tasks() > 0 or remote_task_tracker.n_running_tasks() > 0:
-            completed_local = local_task_tracker.check_all(self.update_time_delay)
-            completed_remote = remote_task_tracker.check_all(self.update_time_delay)
+            completed_local = local_task_tracker.check_all_individually(self.update_time_delay)
+            completed_remote = remote_task_tracker.check_all_batch(self.update_time_delay)
 
             if len(completed_local) > 0 or len(completed_remote) > 0:
                 n_local_completed += len(completed_local)
@@ -66,15 +66,13 @@ class ParallelLocalRunner(object):
 
         task_tracker.start()
         while task_tracker.n_running_tasks() > 0:
-            task_tracker.check_all(self.update_time_delay)
+            task_tracker.check_all_individually(self.update_time_delay)
 
         result_packages = []
         for t in self.tasks:
             result_packages.append(t.get_task_result_package())
 
         return result_packages
-
-
 
 
 def next_time_interval():

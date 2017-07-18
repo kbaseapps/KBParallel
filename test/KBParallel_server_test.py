@@ -138,7 +138,7 @@ class KBParallelTest(unittest.TestCase):
         tasks.append(Task('KBParallelTestModule', 'do_something', 'dev', {'number': 4}, self.token))
         tasks.append(Task('KBParallelTestModule', 'do_something', 'dev', {'number': 5}, self.token))
 
-        plr = ParallelLocalRunner(tasks, 2, 1, 60, self.callback_url)
+        plr = ParallelLocalRunner(tasks, 2, 1, 15, self.callback_url)
         results = plr.run()
 
         self.assertEqual(results[0]['result_package']['result'][0]['new_number'], 100)
@@ -158,7 +158,7 @@ class KBParallelTest(unittest.TestCase):
         # Note: this test submits to the test endpoint NJS wrapper, so really runs things remotely
         n_local_tasks = 1
         n_njsw_tasks = 2
-        plr = ParallelRunner(tasks, 2, n_local_tasks, n_njsw_tasks, 60, self.callback_url, self.execution_engine_url)
+        plr = ParallelRunner(tasks, 2, n_local_tasks, n_njsw_tasks, 15, self.callback_url, self.execution_engine_url)
         results = plr.run()
 
         self.assertEqual(results[0]['result_package']['result'][0]['new_number'], 100)
@@ -168,7 +168,6 @@ class KBParallelTest(unittest.TestCase):
 
 
     def test_batch_runner_interface(self):
-
         def build_task_spec(number):
             return {'module_name': 'KBParallelTestModule',
                     'function_name': 'do_something',

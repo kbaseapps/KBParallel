@@ -27,7 +27,7 @@ class TaskProvider(object):
 class Task(object):
 
     def __init__(self, module_name, function_name, version, parameters, token,
-                 n_connection_retries=5, retry_wait_time=5):
+                 n_connection_retries=5, retry_wait_time=20):
 
         self.module_name = module_name
         self.function_name = function_name
@@ -75,17 +75,18 @@ class Task(object):
         print(str(datetime.now()) + ' - RUNNER SUBMITTING TASK: ' + str(self._job_id) + ' on ' + self.run_location)
         return self._job_id
 
-
-    def is_done(self):
-        ''' check if a job is done; returns True if it is, false otherwise '''
-        self.check_job_state()
+    def is_done(self, recheck=True):
+        ''' check if a job is done; returns True if it is, false otherwise
+        By default, this will call out to the execution engine to get the latest state. To skip
+        that check, set the recheck parameter to False '''
+        if recheck:
+            self.check_job_state()
         if self._final_job_state:
             return True
         return False
 
-
-    def success(self):
-        ''' returns True if finished, no errors were reported, and result is defined.  False otherwise '''
+    def success(self, recheck=True):
+        ''' returns True if finished, no errors were reported, and result is defined.  False otherwise. '''
         self.check_job_state()
         if self._final_job_state:
             if 'error' in self._final_job_state and self._final_job_state['error']:
@@ -93,7 +94,6 @@ class Task(object):
             if 'result' in self._final_job_state and self._final_job_state['result']:
                 return True
         return False
-
 
     def get_task_result_package(self):
         ''' If the job is not finished, throws an exception.
@@ -131,7 +131,6 @@ class Task(object):
                   'final_job_state': self._final_job_state}
         return result
 
-
     def check_job_state(self):
         ''' If the job isn't complete yet, check the job state and return '''
         if not self._job_id:
@@ -142,6 +141,7 @@ class Task(object):
 
         # otherwise we need to call the execution engine
         try:
+            job_state = None
             for k in range(0, self.N_CONNECTION_RETRIES):
                 try:
                     job_state = self.execution_engine._check_job(self.module_name, self._job_id)
@@ -150,7 +150,11 @@ class Task(object):
                     print('WARNING: ConnectionError calling _check_job(job_id=' + str(self._job_id) + ') waiting ' +
                           str(self.RETRY_WAIT_TIME) + ' and retrying')
                     print('Error was: ' + str(e))
+                    job_state = None
                 time.sleep(self.RETRY_WAIT_TIME)
+            if job_state is None:
+                raise ValueError('Max retry attempts failed. Aborting.')
+
         except ServerError as server_error:
             # TODO: would be better to use the njsw or callback server client directly - right now
             # the baseclient emulates calling the module directly, so throws an error on failure
@@ -168,6 +172,19 @@ class Task(object):
 
         return job_state
 
+    def set_job_state(self, job_state):
+        if self._final_job_state:
+            raise ValueError('Cannot set job state - task has already been marked as complete.')
+
+        # job is finished, so remember that
+        if job_state['finished'] == 1:
+            self._final_job_state = job_state
+
+        if 'job_state' in job_state:
+            if self.last_state != job_state['job_state']:
+                self.last_state = job_state['job_state']
+                print(str(datetime.now()) + ' - RUNNER TASK: ' + str(self._job_id) + ' on ' + self.run_location +
+                      ' now on job state: ' + self.last_state)
 
     def get_job_id(self):
         if not self._job_id:
