@@ -1,0 +1,5 @@
+[ {
+  "module_name" : "NarrativeJobService",
+  "type" : "core",
+  "file_path" : "https://raw.githubusercontent.com/kbase/njs_wrapper/develop/NJSWrapper.spec"
+} ]

@@ -119,7 +119,6 @@ class ParallelTaskTracker(object):
                 print('Error was: ' + str(e))
             time.sleep(self.RETRY_WAIT_TIME)
 
-        pprint(jobs_status)
         job_states = jobs_status['job_states']
         check_errors = jobs_status['check_error']  # errors in checking a job state will be reported here
 
