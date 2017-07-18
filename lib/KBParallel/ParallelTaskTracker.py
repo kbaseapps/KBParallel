@@ -109,6 +109,7 @@ class ParallelTaskTracker(object):
 
         # check em
         time.sleep(time_delay)
+        jobs_status = None
         for k in range(0, self.N_CONNECTION_RETRIES):
             try:
                 jobs_status = self.njsw.check_jobs({'job_ids': job_id_list, 'with_job_params': 0})
@@ -117,7 +118,11 @@ class ParallelTaskTracker(object):
                 print('WARNING: ConnectionError calling njsw.check_jobs(...) waiting ' +
                       str(self.RETRY_WAIT_TIME) + ' and retrying')
                 print('Error was: ' + str(e))
+                jobs_status = None
             time.sleep(self.RETRY_WAIT_TIME)
+
+        if jobs_status is None:
+            raise ValueError('Max retry attempts to contact NJSW failed. Aborting.')
 
         job_states = jobs_status['job_states']
         check_errors = jobs_status['check_error']  # errors in checking a job state will be reported here

@@ -141,6 +141,7 @@ class Task(object):
 
         # otherwise we need to call the execution engine
         try:
+            job_state = None
             for k in range(0, self.N_CONNECTION_RETRIES):
                 try:
                     job_state = self.execution_engine._check_job(self.module_name, self._job_id)
@@ -149,7 +150,11 @@ class Task(object):
                     print('WARNING: ConnectionError calling _check_job(job_id=' + str(self._job_id) + ') waiting ' +
                           str(self.RETRY_WAIT_TIME) + ' and retrying')
                     print('Error was: ' + str(e))
+                    job_state = None
                 time.sleep(self.RETRY_WAIT_TIME)
+            if job_state is None:
+                raise ValueError('Max retry attempts failed. Aborting.')
+
         except ServerError as server_error:
             # TODO: would be better to use the njsw or callback server client directly - right now
             # the baseclient emulates calling the module directly, so throws an error on failure
