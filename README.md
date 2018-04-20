@@ -90,11 +90,13 @@ results =>
 ```
 
 ### Some Examples
-1) for a simple hello world example running 3 tasks that just create a .txt file using 1 local & 2 njsw nodes:  
+I.
+for a simple hello world example running 3 tasks that just create a .txt file using 1 local & 2 njsw nodes:  
 
-To try it, search for "kbparallel example" in 'dev'.  https://gitlab.com/jfroula/kbparallel_example.git
+to try it, search for "kbparallel example" in 'dev'.  https://gitlab.com/jfroula/kbparallel_example.git
 
-2) for an example that actually does something, see:  
+II.
+for an example that actually does something:  
 
 search for bowtie2 or "Align Reads using Bowtie2 v2.3.2".  https://github.com/kbaseapps/kb_Bowtie2. 
 
