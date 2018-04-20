@@ -91,12 +91,12 @@ results =>
 
 ### Some Examples
 I.
-for a simple hello world example running 3 tasks that just create a .txt file using 1 local & 2 njsw nodes:  
+For a simple hello world example that runs 3 tasks in parallel; each job creates a .txt file.  The jobs are run on 1 local & 2 njsw nodes:  
 
 to try it, search for "kbparallel example" in 'dev'.  https://gitlab.com/jfroula/kbparallel_example.git
 
 II.
-for an example that actually does something:  
+For an example that actually does something:  
 
 search for bowtie2 or "Align Reads using Bowtie2 v2.3.2".  https://github.com/kbaseapps/kb_Bowtie2. 
 
