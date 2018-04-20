@@ -42,15 +42,16 @@ tasks = [{'module_name': 'kb_Bowtie2',
          ...
          ]
 
-# NOTE: modules called by kbparallel (i.e. kb_Bowtie2) have to be registered in appdev as 'release', 'beta', or 'dev'.
+# NOTE: modules called by kbparallel (i.e. kb_Bowtie2) have to be registered in appdev as 'release', 
+# 'beta', or 'dev'.
 
 
 # configure how tasks are run
 # ---------------------------
 # you can set how many concurrent jobs you want running on the local 
-# machine, 1 in this case, and how many nodes you want running in parallel, 2.
-# For example, in this case, if you have 5 tasks, 3 will get run in 
-# serial on the local machine and 2 on separate nodes. 
+# machine, and how many nodes you want running in parallel.
+# For example, in this case, if you have 5 tasks, 2 will be submitted to 2 njsw nodes and the
+# remaining 3 will get run in serial on the local machine. 
 
 batch_run_params = {'tasks': tasks,
                     'runner': 'parallel', # parallel | local_parallel | local_serial
