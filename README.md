@@ -93,12 +93,12 @@ results =>
 I.
 For a simple hello world example that runs 3 tasks in parallel; each job creates a .txt file.  The jobs are run on 1 local & 2 njsw nodes:  
 
-to try it, search for "kbparallel example" in 'dev'.  https://gitlab.com/jfroula/kbparallel_example.git
+to try it, search for "kbparallel example" in 'dev'.  (also see https://gitlab.com/jfroula/kbparallel_example.git) .  
 
 II.
 For an example that actually does something:  
 
-search for bowtie2 or "Align Reads using Bowtie2 v2.3.2".  https://github.com/kbaseapps/kb_Bowtie2. 
+search for bowtie2 or "Align Reads using Bowtie2 v2.3.2".  (also see https://github.com/kbaseapps/kb_Bowtie2) .  
 
 This example is tricky because it calls the same function ("align" in Bowtie2Aligner.py) twice, once to set up the parallel tasks (runs this section first `if input_info['run_mode'] == 'sample_set'`)  
 
