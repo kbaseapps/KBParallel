@@ -30,8 +30,8 @@ parallel_runner = KBParallel(self.callback_url)
 
 # build a list of tasks
 # ---------------------
-# The parameters `'parameters': { ... }` are the parameters that are sent to 
-# `align_reads_to_assembly_app`.  For instance, if you are trying to align 
+# The parameters 'parameters': { ... } are the parameters that are sent to 
+# align_reads_to_assembly_app.  For instance, if you are trying to align 
 # multiple fastq files in parallel, then the parameters will include 
 # the paths to the fastqs.
 tasks = [{'module_name': 'kb_Bowtie2',
