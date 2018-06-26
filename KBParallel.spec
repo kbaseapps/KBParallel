@@ -60,10 +60,10 @@ module KBParallel {
 
 
     /* 
-        runner = serial_local | parallel_local | parallel
-            serial_local will run tasks on the node in serial, ignoring the concurrent
+        runner = local_serial | local_parallel | parallel
+            local_serial will run tasks on the node in serial, ignoring the concurrent
                 task limits
-            parallel_local will run multiple tasks on the node in parallel, and will
+            local_parallel will run multiple tasks on the node in parallel, and will
                 ignore the njsw_task parameter. Unless you know where your job will
                 run, you probably don't want to set this higher than 2
             parallel will look at both the local task and njsw task limits and operate
