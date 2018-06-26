@@ -15,10 +15,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: RunBatchParams</p>
  * <pre>
- * runner = serial_local | parallel_local | parallel
- *     serial_local will run tasks on the node in serial, ignoring the concurrent
+ * runner = local_serial | local_parallel | parallel
+ *     local_serial will run tasks on the node in serial, ignoring the concurrent
  *         task limits
- *     parallel_local will run multiple tasks on the node in parallel, and will
+ *     local_parallel will run multiple tasks on the node in parallel, and will
  *         ignore the njsw_task parameter. Unless you know where your job will
  *         run, you probably don't want to set this higher than 2
  *     parallel will look at both the local task and njsw task limits and operate
@@ -29,6 +29,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * wsid - if defined, the workspace id or name (service will handle either string or
  *        int) on which to attach the job. Anyone with permissions to that WS will
  *        be able to view job status for this run.
+ * parent_job_id is an optional parameter that allows you to manually set the parent_job_id of
+ *     all tasks that KBParallel will run.
  * </pre>
  * 
  */
@@ -39,7 +41,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "runner",
     "concurrent_local_tasks",
     "concurrent_njsw_tasks",
-    "max_retries"
+    "max_retries",
+    "parent_job_id"
 })
 public class RunBatchParams {
 
@@ -53,6 +56,8 @@ public class RunBatchParams {
     private Long concurrentNjswTasks;
     @JsonProperty("max_retries")
     private Long maxRetries;
+    @JsonProperty("parent_job_id")
+    private String parentJobId;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("tasks")
@@ -130,6 +135,21 @@ public class RunBatchParams {
         return this;
     }
 
+    @JsonProperty("parent_job_id")
+    public String getParentJobId() {
+        return parentJobId;
+    }
+
+    @JsonProperty("parent_job_id")
+    public void setParentJobId(String parentJobId) {
+        this.parentJobId = parentJobId;
+    }
+
+    public RunBatchParams withParentJobId(String parentJobId) {
+        this.parentJobId = parentJobId;
+        return this;
+    }
+
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
@@ -142,7 +162,7 @@ public class RunBatchParams {
 
     @Override
     public String toString() {
-        return ((((((((((((("RunBatchParams"+" [tasks=")+ tasks)+", runner=")+ runner)+", concurrentLocalTasks=")+ concurrentLocalTasks)+", concurrentNjswTasks=")+ concurrentNjswTasks)+", maxRetries=")+ maxRetries)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((("RunBatchParams"+" [tasks=")+ tasks)+", runner=")+ runner)+", concurrentLocalTasks=")+ concurrentLocalTasks)+", concurrentNjswTasks=")+ concurrentNjswTasks)+", maxRetries=")+ maxRetries)+", parentJobId=")+ parentJobId)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

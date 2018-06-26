@@ -25,9 +25,9 @@ class KBParallel:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "0.1.0"
-    GIT_URL = "git@github.com:kbaseapps/KBParallel"
-    GIT_COMMIT_HASH = "8d73c06dcb10600a7eed2696775d1e08505c3b49"
+    VERSION = "0.4.1"
+    GIT_URL = ""
+    GIT_COMMIT_HASH = "b76a9224cdbcf7471fee888cbc535d6dbd8065b4"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -56,9 +56,9 @@ class KBParallel:
     def run_batch(self, ctx, params):
         """
         :param params: instance of type "RunBatchParams" (runner =
-           serial_local | parallel_local | parallel serial_local will run
+           local_serial | local_parallel | parallel local_serial will run
            tasks on the node in serial, ignoring the concurrent task limits
-           parallel_local will run multiple tasks on the node in parallel,
+           local_parallel will run multiple tasks on the node in parallel,
            and will ignore the njsw_task parameter. Unless you know where
            your job will run, you probably don't want to set this higher than
            2 parallel will look at both the local task and njsw task limits
@@ -67,8 +67,10 @@ class KBParallel:
            or parallel_local behavior. TODO: wsid - if defined, the workspace
            id or name (service will handle either string or int) on which to
            attach the job. Anyone with permissions to that WS will be able to
-           view job status for this run.) -> structure: parameter "tasks" of
-           list of type "Task" (Specifies a task to run.  Parameters is an
+           view job status for this run. parent_job_id is an optional
+           parameter that allows you to manually set the parent_job_id of all
+           tasks that KBParallel will run.) -> structure: parameter "tasks"
+           of list of type "Task" (Specifies a task to run.  Parameters is an
            arbitrary data object passed to the function.  If it is a list,
            the params will be interpreted as) -> structure: parameter
            "function" of type "Function" (Specifies a specific KBase module
@@ -77,7 +79,7 @@ class KBParallel:
            String, parameter "params" of unspecified object, parameter
            "runner" of String, parameter "concurrent_local_tasks" of Long,
            parameter "concurrent_njsw_tasks" of Long, parameter "max_retries"
-           of Long
+           of Long, parameter "parent_job_id" of String
         :returns: instance of type "BatchResults" (The list of results will
            be in the same order as the input list of tasks.) -> structure:
            parameter "results" of list of type "TaskResult" -> structure:

@@ -76,6 +76,8 @@ module KBParallel {
                int) on which to attach the job. Anyone with permissions to that WS will
                be able to view job status for this run.
 
+        parent_job_id is an optional parameter that allows you to manually set the parent_job_id of
+            all tasks that KBParallel will run.
     */
     typedef structure {
         list <Task> tasks;
@@ -86,6 +88,7 @@ module KBParallel {
         int concurrent_njsw_tasks;
         
         int max_retries;
+        string parent_job_id;
     } RunBatchParams;
 
 
