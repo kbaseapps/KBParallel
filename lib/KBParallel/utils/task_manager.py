@@ -36,6 +36,7 @@ class TaskManager:
         self.callback_url = kwargs['callback_url']
         self.njs_url = kwargs['config']['njs-wrapper-url']
         self.params = kwargs['params']
+        self.parent_job_id = self.params.get('parent_job_id')
         self.context = kwargs['context']
         self.total_tasks = len(kwargs['params']['tasks'])
         self.max_retries = int(kwargs['params']['max_retries'])
@@ -49,17 +50,8 @@ class TaskManager:
         # Total currently running local and remote jobs
         self.local_running_jobs = 0
         self.remote_running_jobs = 0
+        # Final results when all tasks are completed
         self.results = []
-        # Find and set the job ID of the app that initialized KBParallel
-        # Use that job ID as the parent_job_id for each task
-        log('!!! rpc_context:', str(self.context.get('rpc_context')))
-        if self.context.get('rpc_context'):
-            ctx = self.context['rpc_context']
-            if len(ctx['call_stack']):
-                last_job = ctx['call_stack'][-1]
-                self.parent_job_id = last_job.get('job_id')
-        else:
-            self.parent_job_id = None
 
     def execute_all(self):
         """

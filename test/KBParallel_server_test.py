@@ -171,25 +171,14 @@ class KBParallelTest(unittest.TestCase):
         Test that the parent_job_id of all spawned jobs matches the parent job ID of
         kbparallel.
         """
-        context = self.getContext()
-        # create a fake call stack in the context
-        context['rpc_context'] = {
-            'call_stack': [
-                {
-                    'job_id': 'xyz',
-                    'method': 'my_module.my_method',
-                    'time': '2018-06-06T13:26:59+0000'
-                }
-            ],
-            'run_id': ''
-        }
         task = self.build_task(0)
         params = {
           'tasks': [task],
           'runner': 'parallel',
           'concurrent_njsw_tasks': 0,
           'concurrent_local_tasks': 1,
+          'parent_job_id': 'xyz',
           'max_retries': 1
         }
-        results = self.getImpl().run_batch(context, params)[0]['results']
+        results = self.getImpl().run_batch(self.getContext(), params)[0]['results']
         self.assertEqual(results[0]['result_package']['run_context']['parent_job_id'], 'xyz')
