@@ -46,13 +46,14 @@ class Job:
 
     def run_remotely(self):
         """Run a task remotely using NJSW."""
+        parent_job_id = self.task_manager.parent_job_id
         try:
             self.job_id = self.njsw.run_job({
                 'method': self.task.full_name,
                 'params': [self.task.params],
                 'service_ver': self.task.service_ver,
                 'remote_url': self.task_manager.njs_url,
-                'parent_job_id': self.task_manager.parent_job_id
+                'parent_job_id': parent_job_id
             })
         except Exception as err:
             self.set_failed_state(err)
