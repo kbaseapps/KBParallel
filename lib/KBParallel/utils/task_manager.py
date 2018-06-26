@@ -52,8 +52,12 @@ class TaskManager:
         self.results = []
         # Find and set the job ID of the app that initialized KBParallel
         # Use that job ID as the parent_job_id for each task
-        if self.context['rpc_context'] and len(self.context['rpc_context']):
-            self.parent_job_id = self.context['rpc_context']['call_stack'][0]['job_id']
+        log('!!! rpc_context:', str(self.context.get('rpc_context')))
+        if self.context.get('rpc_context'):
+            ctx = self.context['rpc_context']
+            if len(ctx['call_stack']):
+                last_job = ctx['call_stack'][-1]
+                self.parent_job_id = last_job.get('job_id')
         else:
             self.parent_job_id = None
 
