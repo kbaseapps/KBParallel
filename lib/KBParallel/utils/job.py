@@ -35,7 +35,6 @@ class Job:
 
     def run_local(self):
         """Run a job locally using the callback server."""
-        # Construct a name like "MyModule.my_method"
         try:
             self.job_id = self.base_client._submit_job(
                 self.task.full_name,
@@ -47,7 +46,6 @@ class Job:
 
     def run_remotely(self):
         """Run a task remotely using NJSW."""
-        # Construct a name like "MyModule.my_method"
         try:
             self.job_id = self.njsw.run_job({
                 'method': self.task.full_name,
