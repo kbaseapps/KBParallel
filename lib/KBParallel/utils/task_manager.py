@@ -122,7 +122,8 @@ class TaskManager:
             'result': job_results.get('result'),
             'run_context': {
                 'location': task.current_job.location,
-                'job_id': task.current_job.job_id
+                'job_id': task.current_job.job_id,
+                'parent_job_id': self.parent_job_id
             }
           },
           'is_error': 'error' in job_results,
