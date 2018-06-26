@@ -5,10 +5,7 @@ import json  # noqa: F401
 import time
 
 from os import environ
-try:
-    from ConfigParser import ConfigParser  # py2
-except:
-    from configparser import ConfigParser  # py3
+from ConfigParser import ConfigParser  # py2
 
 from pprint import pprint  # noqa: F401
 
@@ -16,9 +13,6 @@ from biokbase.workspace.client import Workspace as workspaceService
 from KBParallel.KBParallelImpl import KBParallel
 from KBParallel.KBParallelServer import MethodContext
 from KBParallel.authclient import KBaseAuth as _KBaseAuth
-
-from KBParallel.Task import Task
-from KBParallel.Runners import ParallelRunner, ParallelLocalRunner, SerialLocalRunner
 
 
 class KBParallelTest(unittest.TestCase):
@@ -81,101 +75,121 @@ class KBParallelTest(unittest.TestCase):
     def getContext(self):
         return self.__class__.ctx
 
-    def test_task(self):
-        params = {'message': 'xyzabcxyz', 'workspace_name': self.getWsName()}
-        t = Task('echo_test', 'echo', 'dev', params, self.token)
-        t.start(self.callback_url, 'local')
-        while not t.is_done():
-            time.sleep(0.2)
-        self.assertTrue(t.success())
-        result_package = t.get_task_result_package()
-        result_msg = result_package['result_package']['result'][0]['message']
-        self.assertEqual(result_msg, 'xyzabcxyz')
-
-    def test_local_task_failure(self):
-        params = {
-            # Missing required parameter: 'workspace_name'
-            'message': 'x'
-        }
-        t = Task('echo_test', 'echo', 'dev', params, self.token)
-        t.start(self.callback_url, 'local')
-        while not t.is_done():
-            time.sleep(0.2)
-        result_package = t.get_task_result_package()
-        print('abcd', result_package)
-        self.assertFalse(t.success())
-        self.assertEqual(result_package['result_package']['result'], None)
-        self.assertTrue('Server error' in result_package['result_package']['error'])
-
-    def test_njsw_task_failure(self):
-        t = Task('echo_test', 'echo', 'dev', {'throw_error': 1}, self.token)
-        t.start(self.execution_engine_url, 'njsw')
-        while not t.is_done():
-            time.sleep(0.2)
-        self.assertFalse(t.success())
-        result_package = t.get_task_result_package()
-        self.assertEqual(result_package['result_package']['result'], None)
-        self.assertTrue('Server error' in result_package['result_package']['error'])
-
-    def test_serial_local_runner(self):
-        tasks = []
-        for i in range(3):
-            params = {'message': str(i), 'workspace_name': self.getWsName()}
-            tasks.append(Task('echo_test', 'echo', 'dev', params, self.token))
-        slr = SerialLocalRunner(tasks, 1, self.callback_url)
-        results = slr.run()
-        for i in range(3):
-            self.assertEqual(results[i]['result_package']['result'][0]['message'], str(i))
-
-    def test_parallel_local_runner(self):
-        tasks = []
-        for i in range(5):
-            params = {'message': str(i), 'workspace_name': self.getWsName()}
-            tasks.append(Task('echo_test', 'echo', 'dev', params, self.token))
-        plr = ParallelLocalRunner(tasks, 2, 1, 15, self.callback_url)
-        results = plr.run()
-        for i in range(5):
-            self.assertEqual(results[i]['result_package']['result'][0]['message'], str(i))
-
-    def test_parallel_runner(self):
-        tasks = []
-        for i in range(4):
-            params = {'message': str(i), 'workspace_name': self.getWsName()}
-            tasks.append(Task('echo_test', 'echo', 'dev', params, self.token))
-        # Note: this test submits to the test endpoint NJS wrapper, so really runs things remotely
-        n_local_tasks = 1
-        n_njsw_tasks = 2
-        plr = ParallelRunner(tasks, 2, n_local_tasks, n_njsw_tasks, 15, self.callback_url,
-                             self.execution_engine_url)
-        results = plr.run()
-        for i in range(4):
-            self.assertEqual(results[i]['result_package']['result'][0]['message'], str(i))
-
-    def test_batch_runner_interface(self):
-        def build_task(number):
-            return {
-                'module_name': 'echo_test',
-                'function_name': 'echo',
-                'version': 'dev',
-                'parameters': {
-                    'message': 'hola mundo ' + str(number),
-                    'workspace_name': self.getWsName()
-                }
+    # Build some task data fro .run_batch
+    def build_task(self, number):
+        return {
+            'module_name': 'echo_test',
+            'function_name': 'echo',
+            'version': 'dev',
+            'parameters': {
+                'message': 'hola mundo ' + str(number),
+                'workspace_name': self.getWsName()
             }
+        }
 
+    def test_local_task_results(self):
+        """Test that local tasks, run via the callback server, return result packages correctly."""
+        length = 2
         params = {
-          'tasks': [build_task(0), build_task(1), build_task(2), build_task(3)],
+          'tasks': [self.build_task(idx) for idx in range(length)],
           'runner': 'parallel',
-          'concurrent_njsw_tasks': 4,
-          'concurrent_local_tasks': 0,
+          'concurrent_njsw_tasks': 0,
+          'concurrent_local_tasks': 2
+        }
+        results = self.getImpl().run_batch(self.getContext(), params)[0]
+        self.assertIn('results', results)
+        self.assertEqual(len(results['results']), length)
+        for i in range(length):
+            task_result = results['results'][i]['result_package']
+            self.assertEqual(
+                task_result['function'],
+                {'method_name': 'echo', 'module_name': 'echo_test', 'version': 'dev'}
+            )
+            self.assertEqual(task_result['run_context']['location'], 'local')
+            self.assertIsInstance(task_result['run_context']['job_id'], basestring)
+            self.assertEqual(task_result['result'][0]['message'], 'hola mundo ' + str(i))
+
+    def test_remote_task_results(self):
+        """Test that remote tasks, run via NJS, return result packages correctly."""
+        length = 2
+        params = {
+          'tasks': [self.build_task(idx) for idx in range(length)],
+          'runner': 'parallel',
+          'concurrent_njsw_tasks': 2,
+          'concurrent_local_tasks': 0
+        }
+        results = self.getImpl().run_batch(self.getContext(), params)[0]
+        self.assertIn('results', results)
+        self.assertEqual(len(results['results']), length)
+        for i in range(length):
+            task_result = results['results'][i]['result_package']
+            self.assertEqual(
+                task_result['function'],
+                {'method_name': 'echo', 'module_name': 'echo_test', 'version': 'dev'}
+            )
+            self.assertEqual(task_result['run_context']['location'], 'njsw')
+            self.assertIsInstance(task_result['run_context']['job_id'], basestring)
+            self.assertEqual(task_result['result'][0]['message'], 'hola mundo ' + str(i))
+
+    def test_local_task_failures(self):
+        """Test for failed job results run locally."""
+        task = self.build_task(0)
+        task['function_name'] = 'echo_fail'
+        params = {
+          'tasks': [task],
+          'runner': 'parallel',
+          'concurrent_njsw_tasks': 0,
+          'concurrent_local_tasks': 1,
           'max_retries': 2
         }
         results = self.getImpl().run_batch(self.getContext(), params)[0]
-        print('results', results['results'])
         self.assertIn('results', results)
-        self.assertEqual(len(results['results']), 4)
-        for i in range(4):
-            self.assertEqual(
-                results['results'][i]['result_package']['result'][0]['message'],
-                'hola mundo ' + str(i)
-            )
+        task_result = results['results'][0]
+        self.assertEqual(task_result['is_error'], True)
+        self.assertEqual(task_result['result_package']['result'], None)
+        self.assertIsInstance(task_result['result_package']['error'], str)
+
+    def test_remote_task_failures(self):
+        """Test for failed job results run on NJS."""
+        task = self.build_task(0)
+        task['function_name'] = 'echo_fail'
+        params = {
+          'tasks': [task],
+          'runner': 'parallel',
+          'concurrent_njsw_tasks': 1,
+          'concurrent_local_tasks': 0,
+          'max_retries': 1
+        }
+        results = self.getImpl().run_batch(self.getContext(), params)[0]
+        self.assertIn('results', results)
+        task_result = results['results'][0]
+        self.assertEqual(task_result['is_error'], True)
+        self.assertEqual(task_result['result_package']['result'], None)
+
+    def test_set_parent_job_id(self):
+        """
+        Test that the parent_job_id of all spawned jobs matches the parent job ID of
+        kbparallel.
+        """
+        context = self.getContext()
+        # create a fake call stack in the context
+        context['rpc_context'] = {
+            'call_stack': [
+                {
+                    'job_id': 'xyz',
+                    'method': 'my_module.my_method',
+                    'time': '2018-06-06T13:26:59+0000'
+                }
+            ],
+            'run_id': ''
+        }
+        task = self.build_task(0)
+        params = {
+          'tasks': [task],
+          'runner': 'parallel',
+          'concurrent_njsw_tasks': 0,
+          'concurrent_local_tasks': 1,
+          'max_retries': 1
+        }
+        results = self.getImpl().run_batch(context, params)[0]['results']
+        self.assertEqual(results[0]['result_package']['run_context']['parent_job_id'], 'xyz')

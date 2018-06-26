@@ -5,7 +5,8 @@ import os
 import sys
 import logging
 
-from KBParallel.BatchRunner import BatchRunner
+from KBParallel.utils.validate_params import validate_params
+from KBParallel.utils.task_manager import TaskManager
 #END_HEADER
 
 
@@ -37,7 +38,6 @@ class KBParallel:
         #BEGIN_CONSTRUCTOR
         self.callbackURL = os.environ['SDK_CALLBACK_URL']
         self.config = config
-
         # logging
         self.__LOGGER = logging.getLogger('KBParallel')
         if 'log_level' in config:
@@ -96,9 +96,15 @@ class KBParallel:
         # ctx is the context object
         # return variables are: results
         #BEGIN run_batch
-        br = BatchRunner(self.callbackURL, self.config, ctx['token'])
-        result_packages = br.run(params)
-        results = {'results': result_packages}
+        params = validate_params(params)
+        task_manager = TaskManager(
+            callback_url=self.callbackURL,
+            config=self.config,
+            context=ctx,
+            params=params
+        )
+        task_manager.execute_all()
+        results = {'results': task_manager.results}
         #END run_batch
 
         # At some point might do deeper type checking...
