@@ -15,9 +15,8 @@ import us.kbase.common.service.UObject;
 /**
  * <p>Original spec-file type: Task</p>
  * <pre>
- * Specifies a task to run.  Parameters is an arbitrary data object
- * passed to the function.  If it is a list, the params will be interpreted
- * as
+ * * Specifies a task to run by module name, method name, version, and parameters. Parameters is
+ * * an arbitrary data object passed to the function.
  * </pre>
  * 
  */
