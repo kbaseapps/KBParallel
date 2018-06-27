@@ -10,12 +10,6 @@ module KBParallel {
     */
     typedef int boolean;
 
-    /*
-     * Workspace ID reference in the format 'workspace_id/object_id/version'
-     * @id ws
-     */
-    typedef string workspace_id;
-
     /* Specifies a specific KBase module function to run */
     typedef structure {
         string module_name;
@@ -97,7 +91,7 @@ module KBParallel {
         int concurrent_njsw_tasks;
         int max_retries;
         string parent_job_id;
-        workspace_id workspace_id;
+        int workspace_id;
     } RunBatchParams;
 
 

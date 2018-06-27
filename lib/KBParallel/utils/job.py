@@ -53,7 +53,8 @@ class Job:
                 'params': [self.task.params],
                 'service_ver': self.task.service_ver,
                 'remote_url': self.task_manager.njs_url,
-                'parent_job_id': parent_job_id
+                'parent_job_id': parent_job_id,
+                'wsid': self.task_manager.workspace_id
             })
         except Exception as err:
             self.set_failed_state(err)

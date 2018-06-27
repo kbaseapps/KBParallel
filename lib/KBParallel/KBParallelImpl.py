@@ -27,7 +27,7 @@ class KBParallel:
     ######################################### noqa
     VERSION = "0.4.1"
     GIT_URL = ""
-    GIT_COMMIT_HASH = "9c0d4e88bd5535a46a95aee3d0835775e002641f"
+    GIT_COMMIT_HASH = "aba6048bf2ee377058d4861e7388752be4e8d9a6"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -93,8 +93,7 @@ class KBParallel:
            String, parameter "concurrent_local_tasks" of Long, parameter
            "concurrent_njsw_tasks" of Long, parameter "max_retries" of Long,
            parameter "parent_job_id" of String, parameter "workspace_id" of
-           type "workspace_id" (* Workspace ID reference in the format
-           'workspace_id/object_id/version' * @id ws)
+           Long
         :returns: instance of type "BatchResults" (The list of results will
            be in the same order as the input list of tasks.) -> structure:
            parameter "results" of list of type "TaskResult" -> structure:

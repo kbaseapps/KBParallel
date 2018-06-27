@@ -69,7 +69,7 @@ public class RunBatchParams {
     @JsonProperty("parent_job_id")
     private String parentJobId;
     @JsonProperty("workspace_id")
-    private String workspaceId;
+    private Long workspaceId;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("tasks")
@@ -163,16 +163,16 @@ public class RunBatchParams {
     }
 
     @JsonProperty("workspace_id")
-    public String getWorkspaceId() {
+    public Long getWorkspaceId() {
         return workspaceId;
     }
 
     @JsonProperty("workspace_id")
-    public void setWorkspaceId(String workspaceId) {
+    public void setWorkspaceId(Long workspaceId) {
         this.workspaceId = workspaceId;
     }
 
-    public RunBatchParams withWorkspaceId(String workspaceId) {
+    public RunBatchParams withWorkspaceId(Long workspaceId) {
         this.workspaceId = workspaceId;
         return this;
     }
