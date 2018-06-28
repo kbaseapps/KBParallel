@@ -37,6 +37,7 @@ class TaskManager:
         self.njs_url = kwargs['config']['njs-wrapper-url']
         self.params = kwargs['params']
         self.parent_job_id = self.params.get('parent_job_id')
+        self.workspace_id = self.params.get('workspace_id')
         self.context = kwargs['context']
         self.total_tasks = len(kwargs['params']['tasks'])
         self.max_retries = int(kwargs['params']['max_retries'])
