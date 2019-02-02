@@ -25,9 +25,9 @@ class KBParallel:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "0.4.1"
-    GIT_URL = ""
-    GIT_COMMIT_HASH = "aba6048bf2ee377058d4861e7388752be4e8d9a6"
+    VERSION = "0.4.3"
+    GIT_URL = "https://github.com/kbaseapps/KBParallel.git"
+    GIT_COMMIT_HASH = "ba63f69e3177eaa855d8393c95a1498bc1117718"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER

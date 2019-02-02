@@ -1,18 +1,14 @@
 # -*- coding: utf-8 -*-
-import unittest
 import os  # noqa: F401
-import json  # noqa: F401
 import time
-
+import unittest
+from configparser import ConfigParser
 from os import environ
-from ConfigParser import ConfigParser  # py2
 
-from pprint import pprint  # noqa: F401
-
-from biokbase.workspace.client import Workspace as workspaceService
 from KBParallel.KBParallelImpl import KBParallel
 from KBParallel.KBParallelServer import MethodContext
 from KBParallel.authclient import KBaseAuth as _KBaseAuth
+from installed_clients.WorkspaceClient import Workspace as workspaceService
 
 
 class KBParallelTest(unittest.TestCase):
@@ -106,7 +102,7 @@ class KBParallelTest(unittest.TestCase):
                 {'method_name': 'echo', 'module_name': 'echo_test', 'version': 'dev'}
             )
             self.assertEqual(task_result['run_context']['location'], 'local')
-            self.assertIsInstance(task_result['run_context']['job_id'], basestring)
+            self.assertIsInstance(task_result['run_context']['job_id'], str)
             self.assertEqual(task_result['result'][0]['message'], 'hola mundo ' + str(i))
 
     def test_remote_task_results(self):
@@ -128,7 +124,7 @@ class KBParallelTest(unittest.TestCase):
                 {'method_name': 'echo', 'module_name': 'echo_test', 'version': 'dev'}
             )
             self.assertEqual(task_result['run_context']['location'], 'njsw')
-            self.assertIsInstance(task_result['run_context']['job_id'], basestring)
+            self.assertIsInstance(task_result['run_context']['job_id'], str)
             self.assertEqual(task_result['result'][0]['message'], 'hola mundo ' + str(i))
 
     def test_local_task_failures(self):
