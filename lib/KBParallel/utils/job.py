@@ -1,4 +1,4 @@
-from NarrativeJobService.NarrativeJobServiceClient import NarrativeJobService
+from installed_clients.NarrativeJobServiceClient import NarrativeJobService
 from KBParallel.baseclient import BaseClient
 from KBParallel.baseclient import ServerError
 

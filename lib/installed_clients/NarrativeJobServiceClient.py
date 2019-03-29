@@ -12,7 +12,7 @@ from __future__ import print_function
 try:
     # baseclient and this client are in a package
     from .baseclient import BaseClient as _BaseClient  # @UnusedImport
-except:
+except ImportError:
     # no they aren't
     from baseclient import BaseClient as _BaseClient  # @Reimport
 
@@ -23,7 +23,7 @@ class NarrativeJobService(object):
             self, url=None, timeout=30 * 60, user_id=None,
             password=None, token=None, ignore_authrc=False,
             trust_all_ssl_certificates=False,
-            auth_svc='https://kbase.us/services/authorization/Sessions/Login'):
+            auth_svc='https://ci.kbase.us/services/auth/api/legacy/KBase/Sessions/Login'):
         if url is None:
             raise ValueError('A url is required')
         self._service_ver = None
@@ -37,18 +37,16 @@ class NarrativeJobService(object):
         """
         :returns: instance of mapping from String to String
         """
-        return self._client.call_method(
-            'NarrativeJobService.list_config',
-            [], self._service_ver, context)
+        return self._client.call_method('NarrativeJobService.list_config',
+                                        [], self._service_ver, context)
 
     def ver(self, context=None):
         """
         Returns the current running version of the NarrativeJobService.
         :returns: instance of String
         """
-        return self._client.call_method(
-            'NarrativeJobService.ver',
-            [], self._service_ver, context)
+        return self._client.call_method('NarrativeJobService.ver',
+                                        [], self._service_ver, context)
 
     def status(self, context=None):
         """
@@ -61,9 +59,8 @@ class NarrativeJobService(object):
            Long, parameter "config" of mapping from String to String,
            parameter "git_commit" of String
         """
-        return self._client.call_method(
-            'NarrativeJobService.status',
-            [], self._service_ver, context)
+        return self._client.call_method('NarrativeJobService.status',
+                                        [], self._service_ver, context)
 
     def run_job(self, params, context=None):
         """
@@ -87,7 +84,9 @@ class NarrativeJobService(object):
            associate with the job. This data is passed to the User and Job
            State (UJS) service. wsid - a workspace id to associate with the
            job. This is passed to the UJS service, which will share the job
-           based on the permissions of the workspace rather than UJS ACLs.)
+           based on the permissions of the workspace rather than UJS ACLs.
+           parent_job_id - UJS id of the parent of a batch job. Sub jobs will
+           add this id to the NJS database under the field "parent_job_id")
            -> structure: parameter "method" of String, parameter "params" of
            list of unspecified object, parameter "service_ver" of String,
            parameter "rpc_context" of type "RpcContext" (call_stack -
@@ -111,12 +110,12 @@ class NarrativeJobService(object):
            reference of the form X/Y/Z, where X is the workspace name or id,
            Y is the object name or id, Z is the version, which is optional.),
            parameter "app_id" of String, parameter "meta" of mapping from
-           String to String, parameter "wsid" of Long
+           String to String, parameter "wsid" of Long, parameter
+           "parent_job_id" of String
         :returns: instance of type "job_id" (A job id.)
         """
-        return self._client.call_method(
-            'NarrativeJobService.run_job',
-            [params], self._service_ver, context)
+        return self._client.call_method('NarrativeJobService.run_job',
+                                        [params], self._service_ver, context)
 
     def get_job_params(self, job_id, context=None):
         """
@@ -140,7 +139,9 @@ class NarrativeJobService(object):
            associate with the job. This data is passed to the User and Job
            State (UJS) service. wsid - a workspace id to associate with the
            job. This is passed to the UJS service, which will share the job
-           based on the permissions of the workspace rather than UJS ACLs.)
+           based on the permissions of the workspace rather than UJS ACLs.
+           parent_job_id - UJS id of the parent of a batch job. Sub jobs will
+           add this id to the NJS database under the field "parent_job_id")
            -> structure: parameter "method" of String, parameter "params" of
            list of unspecified object, parameter "service_ver" of String,
            parameter "rpc_context" of type "RpcContext" (call_stack -
@@ -164,12 +165,12 @@ class NarrativeJobService(object):
            reference of the form X/Y/Z, where X is the workspace name or id,
            Y is the object name or id, Z is the version, which is optional.),
            parameter "app_id" of String, parameter "meta" of mapping from
-           String to String, parameter "wsid" of Long, (2) parameter "config"
-           of mapping from String to String
+           String to String, parameter "wsid" of Long, parameter
+           "parent_job_id" of String, (2) parameter "config" of mapping from
+           String to String
         """
-        return self._client.call_method(
-            'NarrativeJobService.get_job_params',
-            [job_id], self._service_ver, context)
+        return self._client.call_method('NarrativeJobService.get_job_params',
+                                        [job_id], self._service_ver, context)
 
     def update_job(self, params, context=None):
         """
@@ -181,9 +182,8 @@ class NarrativeJobService(object):
         :returns: instance of type "UpdateJobResults" -> structure: parameter
            "messages" of list of String
         """
-        return self._client.call_method(
-            'NarrativeJobService.update_job',
-            [params], self._service_ver, context)
+        return self._client.call_method('NarrativeJobService.update_job',
+                                        [params], self._service_ver, context)
 
     def add_job_logs(self, job_id, lines, context=None):
         """
@@ -193,9 +193,8 @@ class NarrativeJobService(object):
            (@range [0,1])
         :returns: instance of Long
         """
-        return self._client.call_method(
-            'NarrativeJobService.add_job_logs',
-            [job_id, lines], self._service_ver, context)
+        return self._client.call_method('NarrativeJobService.add_job_logs',
+                                        [job_id, lines], self._service_ver, context)
 
     def get_job_logs(self, params, context=None):
         """
@@ -211,9 +210,8 @@ class NarrativeJobService(object):
            parameter "is_error" of type "boolean" (@range [0,1]), parameter
            "last_line_number" of Long
         """
-        return self._client.call_method(
-            'NarrativeJobService.get_job_logs',
-            [params], self._service_ver, context)
+        return self._client.call_method('NarrativeJobService.get_job_logs',
+                                        [params], self._service_ver, context)
 
     def finish_job(self, job_id, params, context=None):
         """
@@ -233,9 +231,8 @@ class NarrativeJobService(object):
            parameter "is_cancelled" of type "boolean" (@range [0,1]),
            parameter "is_canceled" of type "boolean" (@range [0,1])
         """
-        return self._client.call_method(
-            'NarrativeJobService.finish_job',
-            [job_id, params], self._service_ver, context)
+        return self._client.call_method('NarrativeJobService.finish_job',
+                                        [job_id, params], self._service_ver, context)
 
     def check_job(self, job_id, context=None):
         """
@@ -268,9 +265,8 @@ class NarrativeJobService(object):
            of Long, parameter "cancelled" of type "boolean" (@range [0,1]),
            parameter "canceled" of type "boolean" (@range [0,1])
         """
-        return self._client.call_method(
-            'NarrativeJobService.check_job',
-            [job_id], self._service_ver, context)
+        return self._client.call_method('NarrativeJobService.check_job',
+                                        [job_id], self._service_ver, context)
 
     def check_jobs(self, params, context=None):
         """
@@ -325,7 +321,9 @@ class NarrativeJobService(object):
            associate with the job. This data is passed to the User and Job
            State (UJS) service. wsid - a workspace id to associate with the
            job. This is passed to the UJS service, which will share the job
-           based on the permissions of the workspace rather than UJS ACLs.)
+           based on the permissions of the workspace rather than UJS ACLs.
+           parent_job_id - UJS id of the parent of a batch job. Sub jobs will
+           add this id to the NJS database under the field "parent_job_id")
            -> structure: parameter "method" of String, parameter "params" of
            list of unspecified object, parameter "service_ver" of String,
            parameter "rpc_context" of type "RpcContext" (call_stack -
@@ -350,23 +348,22 @@ class NarrativeJobService(object):
            Y is the object name or id, Z is the version, which is optional.),
            parameter "app_id" of String, parameter "meta" of mapping from
            String to String, parameter "wsid" of Long, parameter
-           "check_error" of mapping from type "job_id" (A job id.) to type
-           "JsonRpcError" (Error block of JSON RPC response) -> structure:
-           parameter "name" of String, parameter "code" of Long, parameter
-           "message" of String, parameter "error" of String
+           "parent_job_id" of String, parameter "check_error" of mapping from
+           type "job_id" (A job id.) to type "JsonRpcError" (Error block of
+           JSON RPC response) -> structure: parameter "name" of String,
+           parameter "code" of Long, parameter "message" of String, parameter
+           "error" of String
         """
-        return self._client.call_method(
-            'NarrativeJobService.check_jobs',
-            [params], self._service_ver, context)
+        return self._client.call_method('NarrativeJobService.check_jobs',
+                                        [params], self._service_ver, context)
 
     def cancel_job(self, params, context=None):
         """
         :param params: instance of type "CancelJobParams" -> structure:
            parameter "job_id" of type "job_id" (A job id.)
         """
-        return self._client.call_method(
-            'NarrativeJobService.cancel_job',
-            [params], self._service_ver, context)
+        return self._client.call_method('NarrativeJobService.cancel_job',
+                                        [params], self._service_ver, context)
 
     def check_job_canceled(self, params, context=None):
         """
@@ -382,6 +379,5 @@ class NarrativeJobService(object):
            [0,1]), parameter "canceled" of type "boolean" (@range [0,1]),
            parameter "ujs_url" of String
         """
-        return self._client.call_method(
-            'NarrativeJobService.check_job_canceled',
-            [params], self._service_ver, context)
+        return self._client.call_method('NarrativeJobService.check_job_canceled',
+                                        [params], self._service_ver, context)
