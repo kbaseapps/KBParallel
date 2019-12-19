@@ -57,11 +57,13 @@ class Job:
                 'service_ver': self.task.service_ver,
                 'parent_job_id': parent_job_id,
                 "app_id": self.task.full_name.split(".")[0],
-                'wsid': self.task_manager.workspace_id
+                'wsid': self.task_manager.workspace_id,
+                'remote_url': self.task_manager.ee2_url,
             }
             self.job_id = self.ee2.run_job(params=runjob_params)
             print("EE2 JOB ID IS", self.job_id)
         except Exception as err:
+            self.set_failed_state(err)
             raise (err)
 
     def set_failed_state(self, err):
@@ -87,15 +89,15 @@ class Job:
             status = self.base_client._check_job(module, self.job_id)
         except ServerError as err:
             self.error = err
-            status = {'finished': 1, 'job_state': 'suspend', 'error': str(err), 'ServerError' : 'Cannot check status of ' + self.job_id}
+            status = {'finished': 1, 'job_state': 'suspend', 'error': str(err)}
         return status
 
     def check_ee2_status(self):
         """Check the result of a job running on NJS."""
 
-        cjp = {'job_id' : self.job_id}
+        cjp = {'job_id': self.job_id, 'projection': []}
         response = self.ee2.check_job(params=cjp)
-        from pprint import  pprint
+        from pprint import pprint
         pprint(response)
         job_state = response
         self.error = job_state.get('error')
