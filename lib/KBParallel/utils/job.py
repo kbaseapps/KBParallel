@@ -1,6 +1,7 @@
-from installed_clients.NarrativeJobServiceClient import NarrativeJobService
 from KBParallel.baseclient import BaseClient
 from KBParallel.baseclient import ServerError
+
+from installed_clients.execution_engine2Client import execution_engine2
 
 
 class Job:
@@ -30,7 +31,8 @@ class Job:
             self.base_client = BaseClient(self.task_manager.callback_url, token=token)
             self.run_local()
         else:
-            self.njsw = NarrativeJobService(self.task_manager.njs_url)
+            self.ee2 = execution_engine2(self.task_manager.ee2_url)
+            print("ee2 url is", self.task_manager.ee2_url)
             self.run_remotely()
 
     def run_local(self):
@@ -48,16 +50,19 @@ class Job:
         """Run a task remotely using NJSW."""
         parent_job_id = self.task_manager.parent_job_id
         try:
-            self.job_id = self.njsw.run_job({
-                'method': self.task.full_name,
-                'params': [self.task.params],
+            params = self.task.params
+            runjob_params = {
+                "method": self.task.full_name,
+                "params": [params],
                 'service_ver': self.task.service_ver,
-                'remote_url': self.task_manager.njs_url,
                 'parent_job_id': parent_job_id,
+                "app_id": self.task.full_name.split(".")[0],
                 'wsid': self.task_manager.workspace_id
-            })
+            }
+            self.job_id = self.ee2.run_job(params=runjob_params)
+            print("EE2 JOB ID IS", self.job_id)
         except Exception as err:
-            self.set_failed_state(err)
+            raise (err)
 
     def set_failed_state(self, err):
         """Mark the job as failed from an exception that was thrown."""
@@ -72,7 +77,7 @@ class Job:
         if self.location == 'local':
             results = self.check_local_status()
         else:
-            results = self.check_njs_status()
+            results = self.check_ee2_status()
         self.task.handle_job_results(results)
 
     def check_local_status(self):
@@ -82,15 +87,16 @@ class Job:
             status = self.base_client._check_job(module, self.job_id)
         except ServerError as err:
             self.error = err
-            status = {'finished': 1, 'job_state': 'suspend', 'error': str(err)}
+            status = {'finished': 1, 'job_state': 'suspend', 'error': str(err), 'ServerError' : 'Cannot check status of ' + self.job_id}
         return status
 
-    def check_njs_status(self):
+    def check_ee2_status(self):
         """Check the result of a job running on NJS."""
-        response = self.njsw.check_jobs({
-            'job_ids': [self.job_id],
-            'with_job_params': 0
-        })
-        job_state = response['job_states'][self.job_id]
+
+        cjp = {'job_id' : self.job_id}
+        response = self.ee2.check_job(params=cjp)
+        from pprint import  pprint
+        pprint(response)
+        job_state = response
         self.error = job_state.get('error')
         return job_state

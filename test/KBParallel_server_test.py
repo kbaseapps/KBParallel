@@ -9,7 +9,7 @@ from KBParallel.KBParallelImpl import KBParallel
 from KBParallel.KBParallelServer import MethodContext
 from KBParallel.authclient import KBaseAuth as _KBaseAuth
 from installed_clients.WorkspaceClient import Workspace as workspaceService
-
+from pprint import pprint
 
 class KBParallelTest(unittest.TestCase):
 
@@ -97,12 +97,15 @@ class KBParallelTest(unittest.TestCase):
         self.assertEqual(len(results['results']), length)
         for i in range(length):
             task_result = results['results'][i]['result_package']
+            pprint(task_result)
             self.assertEqual(
                 task_result['function'],
                 {'method_name': 'echo', 'module_name': 'echo_test', 'version': 'dev'}
             )
             self.assertEqual(task_result['run_context']['location'], 'local')
             self.assertIsInstance(task_result['run_context']['job_id'], str)
+            self.assertIsNotNone(task_result['result'])
+            self.assertIsNotNone(task_result['result'][0])
             self.assertEqual(task_result['result'][0]['message'], 'hola mundo ' + str(i))
 
     def test_remote_task_results(self):
@@ -118,7 +121,9 @@ class KBParallelTest(unittest.TestCase):
         self.assertIn('results', results)
         self.assertEqual(len(results['results']), length)
         for i in range(length):
+
             task_result = results['results'][i]['result_package']
+            pprint(task_result)
             self.assertEqual(
                 task_result['function'],
                 {'method_name': 'echo', 'module_name': 'echo_test', 'version': 'dev'}
