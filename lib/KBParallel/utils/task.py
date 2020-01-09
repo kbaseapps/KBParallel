@@ -49,7 +49,7 @@ class Task:
         """Update the results for a finished current_job."""
         if results.get('error'):
             self.failures += 1
-        elif results['finished']:
+        elif results.get('finished'):
             self.completed = True
             self.results = results
         if self.failures == self.task_manager.max_retries:

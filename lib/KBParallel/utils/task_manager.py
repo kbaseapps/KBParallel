@@ -2,7 +2,7 @@ import time
 
 from KBParallel.utils.task import Task
 from KBParallel.utils.log import log
-
+from pprint import pprint
 
 class TaskManager:
     """
@@ -34,7 +34,7 @@ class TaskManager:
           params - parameters passed to KBParallel.run_batch (see KBParallel.spec)
         """
         self.callback_url = kwargs['callback_url']
-        self.njs_url = kwargs['config']['njs-wrapper-url']
+        self.ee2_url = kwargs['config']['ee2-url']
         self.params = kwargs['params']
         self.parent_job_id = self.params.get('parent_job_id')
         self.workspace_id = self.params.get('workspace_id')
@@ -108,6 +108,10 @@ class TaskManager:
     def append_to_results(self, task):
         """Append data from a completed task to our results dictionary."""
         job_results = task.results
+        job_output = job_results.get('job_output')
+        if job_output:
+            job_output = job_output.get('result')
+
         result = {
           'result_package': {
             'function': {
@@ -116,7 +120,7 @@ class TaskManager:
                 'version': task.service_ver
             },
             'error': str(job_results.get('error')),
-            'result': job_results.get('result'),
+            'result': job_output,
             'run_context': {
                 'location': task.current_job.location,
                 'job_id': task.current_job.job_id,
@@ -126,6 +130,14 @@ class TaskManager:
           'is_error': 'error' in job_results,
           'final_job_state': job_results
         }
+        print("Job results are")
+        pprint(job_results)
+        print("Source task is")
+        pprint(task)
+        pprint(task.results )
+        print("About to add this result for job id", task.current_job.job_id, )
+        pprint(result)
+
         self.results.append(result)
 
 
