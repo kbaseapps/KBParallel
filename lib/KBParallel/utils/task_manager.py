@@ -3,6 +3,7 @@ import time
 from KBParallel.utils.task import Task
 from KBParallel.utils.log import log
 from pprint import pprint
+from datetime import datetime
 
 class TaskManager:
     """
@@ -85,7 +86,7 @@ class TaskManager:
                     self.running_tasks.pop(idx)
                     self.pending_tasks.append(task)
                 else:
-                    log('task still running:', task.full_name)
+                    log('Waiting on task:', task.full_name, task.current_job.job_id,  datetime.now(), )
             # Queue up all pending tasks
             while len(self.pending_tasks) and self.local_running_jobs < max_local:
                 task = self.pending_tasks.pop()
@@ -105,12 +106,16 @@ class TaskManager:
         for task in self.tasks:
             self.append_to_results(task)
 
+
     def append_to_results(self, task):
         """Append data from a completed task to our results dictionary."""
         job_results = task.results
-        job_output = job_results.get('job_output')
-        if job_output:
-            job_output = job_output.get('result')
+        job_results['exec_start_time'] = job_results.get('created')
+        job_results['finish_time'] = job_results.get('finished')
+        try:
+            job_results['result'] = job_results.get('job_output').get('result')
+        except AttributeError:
+            job_results['result'] = None
 
         result = {
           'result_package': {
@@ -120,7 +125,7 @@ class TaskManager:
                 'version': task.service_ver
             },
             'error': str(job_results.get('error')),
-            'result': job_output,
+            'result': job_results.get('result'),
             'run_context': {
                 'location': task.current_job.location,
                 'job_id': task.current_job.job_id,
@@ -130,15 +135,8 @@ class TaskManager:
           'is_error': 'error' in job_results,
           'final_job_state': job_results
         }
-        print("Job results are")
-        pprint(job_results)
-        print("Source task is")
-        pprint(task)
-        pprint(task.results )
-        print("About to add this result for job id", task.current_job.job_id, )
-        pprint(result)
-
         self.results.append(result)
+
 
 
 # Utilities
