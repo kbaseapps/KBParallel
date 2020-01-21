@@ -112,6 +112,8 @@ class TaskManager:
         job_results = task.results
         job_results['exec_start_time'] = job_results.get('created')
         job_results['finish_time'] = job_results.get('finished')
+        job_results['job_state'] = job_results.get('status')
+
         try:
             job_results['result'] = job_results.get('job_output').get('result')
         except AttributeError:
