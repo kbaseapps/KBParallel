@@ -32,7 +32,6 @@ class Job:
             self.run_local()
         else:
             self.ee2 = execution_engine2(self.task_manager.ee2_url)
-            print("ee2 url is", self.task_manager.ee2_url)
             self.run_remotely()
 
     def run_local(self):
@@ -61,7 +60,6 @@ class Job:
                 'remote_url': self.task_manager.ee2_url,
             }
             self.job_id = self.ee2.run_job(params=runjob_params)
-            print("EE2 JOB ID IS", self.job_id)
         except Exception as err:
             self.set_failed_state(err)
             raise (err)
@@ -96,9 +94,6 @@ class Job:
         """Check the result of a job running on NJS."""
 
         cjp = {'job_id': self.job_id, 'projection': []}
-        response = self.ee2.check_job(params=cjp)
-        from pprint import pprint
-        pprint(response)
-        job_state = response
+        job_state = self.ee2.check_job(params=cjp)
         self.error = job_state.get('error')
         return job_state
