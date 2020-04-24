@@ -1,7 +1,7 @@
 from KBParallel.baseclient import BaseClient
 from KBParallel.baseclient import ServerError
 
-from installed_clients.execution_engine2Client import execution_engine2
+from installed_clients.execution_engine2Client import execution_engine2 as EE2
 
 
 class Job:
@@ -31,7 +31,7 @@ class Job:
             self.base_client = BaseClient(self.task_manager.callback_url, token=token)
             self.run_local()
         else:
-            self.ee2 = execution_engine2(self.task_manager.ee2_url)
+            self.ee2 = EE2(self.task_manager.ee2_url)
             self.run_remotely()
 
     def run_local(self):
