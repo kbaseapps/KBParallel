@@ -118,6 +118,10 @@ class TaskManager:
             job_results['result'] = job_results.get('job_output').get('result')
         except AttributeError:
             job_results['result'] = None
+            # Local Jobs
+            if 'result' in task.results:
+                job_results['result'] = task.results['result']
+
 
         result = {
           'result_package': {

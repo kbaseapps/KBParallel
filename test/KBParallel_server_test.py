@@ -9,7 +9,7 @@ from KBParallel.KBParallelImpl import KBParallel
 from KBParallel.KBParallelServer import MethodContext
 from KBParallel.authclient import KBaseAuth as _KBaseAuth
 from installed_clients.WorkspaceClient import Workspace as workspaceService
-from pprint import pprint
+
 
 class KBParallelTest(unittest.TestCase):
 
@@ -83,54 +83,48 @@ class KBParallelTest(unittest.TestCase):
             }
         }
 
-    # def Xtest_local_task_results(self):
-    #     """Test that local tasks, run via the callback server, return result packages correctly."""
-    #     length = 2
-    #     params = {
-    #       'tasks': [self.build_task(idx) for idx in range(length)],
-    #       'runner': 'parallel',
-    #       'concurrent_njsw_tasks': 0,
-    #       'concurrent_local_tasks': 2
-    #     }
-    #     results = self.getImpl().run_batch(self.getContext(), params)[0]
-    #     self.assertIn('results', results)
-    #     self.assertEqual(len(results['results']), length)
-    #     for i in range(length):
-    #         task_result = results['results'][i]['result_package']
-    #         pprint(task_result)
-    #         self.assertEqual(
-    #             task_result['function'],
-    #             {'method_name': 'echo', 'module_name': 'echo_test', 'version': 'dev'}
-    #         )
-    #         self.assertEqual(task_result['run_context']['location'], 'local')
-    #         self.assertIsInstance(task_result['run_context']['job_id'], str)
-    #         self.assertIsNotNone(task_result['result'])
-    #         self.assertIsNotNone(task_result['result'][0])
-    #         self.assertEqual(task_result['result'][0]['message'], 'hola mundo ' + str(i))
-
-    def test_remote_task_results(self):
-        """Test that remote tasks, run via NJS, return result packages correctly."""
-        length = 1
+    def test_local_task_results(self):
+        """Test that local tasks, run via the callback server, return result packages correctly."""
+        length = 2
         params = {
           'tasks': [self.build_task(idx) for idx in range(length)],
           'runner': 'parallel',
-          'concurrent_njsw_tasks': length,
+          'concurrent_njsw_tasks': 0,
+          'concurrent_local_tasks': 2
+        }
+        results = self.getImpl().run_batch(self.getContext(), params)[0]
+        self.assertIn('results', results)
+        self.assertEqual(len(results['results']), length)
+        for i in range(length):
+            task_result = results['results'][i]['result_package']
+            self.assertEqual(
+                task_result['function'],
+                {'method_name': 'echo', 'module_name': 'echo_test', 'version': 'dev'}
+            )
+            self.assertEqual(task_result['run_context']['location'], 'local')
+            self.assertIsInstance(task_result['run_context']['job_id'], str)
+            self.assertEqual(task_result['result'][0]['message'], 'hola mundo ' + str(i))
+
+    def test_remote_task_results(self):
+        """Test that remote tasks, run via NJS, return result packages correctly."""
+        length = 2
+        params = {
+          'tasks': [self.build_task(idx) for idx in range(length)],
+          'runner': 'parallel',
+          'concurrent_njsw_tasks': 2,
           'concurrent_local_tasks': 0
         }
         results = self.getImpl().run_batch(self.getContext(), params)[0]
         self.assertIn('results', results)
         self.assertEqual(len(results['results']), length)
         for i in range(length):
-
             task_result = results['results'][i]['result_package']
-            pprint(task_result)
             self.assertEqual(
                 task_result['function'],
                 {'method_name': 'echo', 'module_name': 'echo_test', 'version': 'dev'}
             )
             self.assertEqual(task_result['run_context']['location'], 'njsw')
             self.assertIsInstance(task_result['run_context']['job_id'], str)
-            print("job id is", task_result['run_context']['job_id'])
             self.assertEqual(task_result['result'][0]['message'], 'hola mundo ' + str(i))
 
     def test_local_task_failures(self):
