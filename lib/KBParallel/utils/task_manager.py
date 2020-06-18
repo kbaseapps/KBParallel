@@ -1,9 +1,10 @@
 import time
-
-from KBParallel.utils.task import Task
-from KBParallel.utils.log import log
-from pprint import pprint
+from copy import copy
 from datetime import datetime
+
+from KBParallel.utils.log import log
+from KBParallel.utils.task import Task
+
 
 class TaskManager:
     """
@@ -86,7 +87,8 @@ class TaskManager:
                     self.running_tasks.pop(idx)
                     self.pending_tasks.append(task)
                 else:
-                    log('Waiting on task:', task.full_name, task.current_job.job_id,  datetime.now(), )
+                    log('Waiting on task:', task.full_name, task.current_job.job_id,
+                        datetime.now(), )
             # Queue up all pending tasks
             while len(self.pending_tasks) and self.local_running_jobs < max_local:
                 task = self.pending_tasks.pop()
@@ -106,10 +108,9 @@ class TaskManager:
         for task in self.tasks:
             self.append_to_results(task)
 
-
     def append_to_results(self, task):
         """Append data from a completed task to our results dictionary."""
-        job_results = task.results
+        job_results = copy(task.results)
         job_results['exec_start_time'] = job_results.get('created')
         job_results['finish_time'] = job_results.get('finished')
         job_results['job_state'] = job_results.get('status')
@@ -122,27 +123,25 @@ class TaskManager:
             if 'result' in task.results:
                 job_results['result'] = task.results['result']
 
-
         result = {
-          'result_package': {
-            'function': {
-                'module_name': task.module_name,
-                'method_name': task.method_name,
-                'version': task.service_ver
+            'result_package': {
+                'function': {
+                    'module_name': task.module_name,
+                    'method_name': task.method_name,
+                    'version': task.service_ver
+                },
+                'error': str(job_results.get('error')),
+                'result': job_results.get('result'),
+                'run_context': {
+                    'location': task.current_job.location,
+                    'job_id': task.current_job.job_id,
+                    'parent_job_id': self.parent_job_id
+                }
             },
-            'error': str(job_results.get('error')),
-            'result': job_results.get('result'),
-            'run_context': {
-                'location': task.current_job.location,
-                'job_id': task.current_job.job_id,
-                'parent_job_id': self.parent_job_id
-            }
-          },
-          'is_error': 'error' in job_results,
-          'final_job_state': job_results
+            'is_error': 'error' in job_results,
+            'final_job_state': job_results
         }
         self.results.append(result)
-
 
 
 # Utilities

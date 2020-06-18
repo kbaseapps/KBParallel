@@ -85,6 +85,7 @@ class KBParallelTest(unittest.TestCase):
 
     def test_local_task_results(self):
         """Test that local tasks, run via the callback server, return result packages correctly."""
+        print("Running test local task results")
         length = 2
         params = {
           'tasks': [self.build_task(idx) for idx in range(length)],
@@ -105,8 +106,11 @@ class KBParallelTest(unittest.TestCase):
             self.assertIsInstance(task_result['run_context']['job_id'], str)
             self.assertEqual(task_result['result'][0]['message'], 'hola mundo ' + str(i))
 
+        print("Success")
+
     def test_remote_task_results(self):
         """Test that remote tasks, run via NJS, return result packages correctly."""
+        print("Running test remote task results")
         length = 2
         params = {
           'tasks': [self.build_task(idx) for idx in range(length)],
@@ -129,6 +133,7 @@ class KBParallelTest(unittest.TestCase):
 
     def test_local_task_failures(self):
         """Test for failed job results run locally."""
+        print("Running test local task failures")
         task = self.build_task(0)
         task['function_name'] = 'echo_fail'
         params = {
@@ -147,6 +152,7 @@ class KBParallelTest(unittest.TestCase):
 
     def test_remote_task_failures(self):
         """Test for failed job results run on NJS."""
+        print("Running test remote task failures")
         task = self.build_task(0)
         task['function_name'] = 'echo_fail'
         params = {
@@ -167,6 +173,7 @@ class KBParallelTest(unittest.TestCase):
         Test that the parent_job_id of all spawned jobs matches the parent job ID of
         kbparallel.
         """
+        print("Running Test Set Parent Job Id")
         task = self.build_task(0)
         params = {
           'tasks': [task],
