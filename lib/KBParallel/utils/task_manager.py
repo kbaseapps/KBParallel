@@ -123,6 +123,7 @@ class TaskManager:
             if 'result' in task.results:
                 job_results['result'] = task.results['result']
 
+
         result = {
             'result_package': {
                 'function': {
@@ -130,7 +131,7 @@ class TaskManager:
                     'method_name': task.method_name,
                     'version': task.service_ver
                 },
-                'error': str(job_results.get('error')),
+
                 'result': job_results.get('result'),
                 'run_context': {
                     'location': task.current_job.location,
@@ -141,6 +142,11 @@ class TaskManager:
             'is_error': 'error' in job_results,
             'final_job_state': job_results
         }
+        # Only append the error if it is not None
+        error = job_results.get('error')
+        if error:
+            result['result_package']['error'] = str(error)
+
         self.results.append(result)
 
 
