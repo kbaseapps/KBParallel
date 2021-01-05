@@ -1,7 +1,9 @@
 import time
+from copy import copy
+from datetime import datetime
 
-from KBParallel.utils.task import Task
 from KBParallel.utils.log import log
+from KBParallel.utils.task import Task
 
 
 class TaskManager:
@@ -34,7 +36,7 @@ class TaskManager:
           params - parameters passed to KBParallel.run_batch (see KBParallel.spec)
         """
         self.callback_url = kwargs['callback_url']
-        self.njs_url = kwargs['config']['njs-wrapper-url']
+        self.ee2_url = kwargs['config']['ee2-url']
         self.params = kwargs['params']
         self.parent_job_id = self.params.get('parent_job_id')
         self.workspace_id = self.params.get('workspace_id')
@@ -85,7 +87,8 @@ class TaskManager:
                     self.running_tasks.pop(idx)
                     self.pending_tasks.append(task)
                 else:
-                    log('task still running:', task.full_name)
+                    log('Waiting on task:', task.full_name, task.current_job.job_id,
+                        datetime.now(), )
             # Queue up all pending tasks
             while len(self.pending_tasks) and self.local_running_jobs < max_local:
                 task = self.pending_tasks.pop()
@@ -107,25 +110,46 @@ class TaskManager:
 
     def append_to_results(self, task):
         """Append data from a completed task to our results dictionary."""
-        job_results = task.results
+        job_results = copy(task.results)
+        job_results['exec_start_time'] = job_results.get('created')
+        job_results['finish_time'] = job_results.get('finished')
+        job_results['job_state'] = job_results.get('status')
+
+        try:
+            job_results['result'] = job_results.get('job_output').get('result')
+        except AttributeError:
+            job_results['result'] = None
+            # Local Jobs
+            if 'result' in task.results:
+                job_results['result'] = task.results['result']
+
+
         result = {
-          'result_package': {
-            'function': {
-                'module_name': task.module_name,
-                'method_name': task.method_name,
-                'version': task.service_ver
+            'result_package': {
+                'function': {
+                    'module_name': task.module_name,
+                    'method_name': task.method_name,
+                    'version': task.service_ver
+                },
+                'error': job_results.get('error'),
+                'result': job_results.get('result'),
+                'run_context': {
+                    'location': task.current_job.location,
+                    'job_id': task.current_job.job_id,
+                    'parent_job_id': self.parent_job_id
+                }
             },
-            'error': str(job_results.get('error')),
-            'result': job_results.get('result'),
-            'run_context': {
-                'location': task.current_job.location,
-                'job_id': task.current_job.job_id,
-                'parent_job_id': self.parent_job_id
-            }
-          },
-          'is_error': 'error' in job_results,
-          'final_job_state': job_results
+            'is_error': 'error' in job_results,
+            'final_job_state': job_results
         }
+
+        # # Only append the error if it is not None
+        # result['result_package']['error'] = None
+        # if job_results.get('error'):
+        #     result['result_package']['error'] = str(error)
+        # else:
+        #
+
         self.results.append(result)
 
 
